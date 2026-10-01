@@ -16,4 +16,4 @@ An interactive, web-based production timeline for the assembly, testing, and lau
 ## 📊 Sources & Credits
 * **Created by:** [@Basvandenboorn](https://github.com/Basvandenboorn)
 * **Data Sources:** [Starship SpaceX Wiki](https://starship-spacex.fandom.com/) & RingWatchers Discord
-* **Inspiration:** Inspired by the design of `starship-timeline.pages.dev` (@mokka on RW Discord). Since Starship was missing on his version, I updated and expanded this project to include both Ships and Boosters.
+* **Inspiration:** Inspired by the design of `starship-timeline.pages.dev` (@morra on RW Discord). Since Starship was missing on his version, I updated and expanded this project to include both Ships and Boosters.
