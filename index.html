@@ -54,7 +54,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
 #svg [style*="pointer"]:hover,#pace svg [style*="pointer"]:hover{filter:brightness(1.35) drop-shadow(0 0 3px #fff7)}
 #tt{position:fixed;display:none;z-index:50;pointer-events:none;background:#1b222d;border:1px solid #2d3644;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.5;max-width:330px;box-shadow:0 8px 24px #0009}
 #tt b{display:block;color:#fff;margin-bottom:2px}#tt div{color:#cfd4dc}
-</style></head><body><main>
+.lg .rst{margin-left:auto;border:1px solid var(--line);color:var(--ink)}.lg .rst:disabled{opacity:.4;cursor:default}.lh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.lh p{margin:0!important}.lh .rst{border:1px solid var(--line);color:var(--ink)}.lh .rst:disabled{opacity:.4;cursor:default}</style></head><body><main>
 <div id="view">
 <header><h1 id="h1">Starship Booster Production Timeline</h1><div class="upd" id="upd"></div></header>
 
@@ -66,7 +66,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
   <div class="meta"><span id="range"></span><span>Click for details · click legend to filter · drag to pan · scroll, pinch, or +/− to zoom</span></div>
   <div class="chart"><div class="lab" id="lab"></div><div id="sc"><svg id="svg"></svg></div></div>
   <div id="info">Click a bar or icon for details.</div>
-  <div class="leg"><p><b>Display filters</b> &nbsp;Click to toggle · Shift-click to isolate</p><div class="lg" id="lg"></div></div>
+  <div class="leg"><div class="lh"><p><b>Display filters</b> &nbsp;Click to toggle · Shift-click to isolate</p><button id="rf" class="rst">Reset filters</button></div><div class="lg" id="lg"></div></div>
  </div>
  <div id="pace" class="pace" hidden></div>
 </div>
@@ -99,9 +99,14 @@ button:not(:disabled):hover{filter:brightness(1.25)}
 <script src="data.js"></script>
 <script>
 const PT={stack:["Stacking","#2f6650","Stack"],outfit:["Outfitting / wait","#6e5626","Outfit"],raptor:["Raptor integration","#84591a","Raptors"],proof:["Proof / cryo","#2f5568"],lpt:["Launch-pad tests","#6a4a3a"],flight:["Flight integration","#57467e","Flight prep"]};
-const ET={ring:["Stack progress","#ffffff"],cryo:["Cryo","#2b8fc0"],static:["Static fire","#d9702a"],launch:["Launch","#7c5fcf"],issue:["Issue","#d9473f"]};
+const ET={ring:["Stack progress","#ffffff"],cryo:["Cryo","#2b8fc0"],static:["Static fire","#d9702a"],launch:["Launch","#7c5fcf"],issue:["Issue","#d9473f"],fts:["FTS","#e6c229"],spin:["Spin Prime","#2fa563"],starlink:["Starlink","#d36fc7"]};
+const EVL=()=>["spin","cryo","static","fts",...(kind==="ship"?["starlink"]:[]),"launch","issue"]; // legend / filter order per tab
 // Stacking milestones for the pace chart: [key, name, sublabel]. Edit freely.
-const STACKM=[["first","First section",""],["A3","A3","M:11"],["A4","A4","M:15"],["A5","A5","M:19"],["A6","A6","M:23"],["AX","AX","A:25"],["F2","F2",""],["FX","FX","F:7"],["F3","F3","F:11"],["complete","Complete",""]];
+// Stacking milestones for the pace chart, per vehicle kind: [key, name, sublabel]. Edit freely.
+const STACKS={
+ booster:[["first","First section",""],["A3","A3","M:11"],["A4","A4","M:15"],["A5","A5","M:19"],["A6","A6","M:23"],["AX","AX","A:25"],["F2","F2",""],["FX","FX","F:7"],["F3","F3","F:11"],["complete","Complete",""]],
+ ship:[["first","First section",""],["pez","PEZ",""],["FX4","FX","N:7"],["CX3","CX","N:10"],["A23","A2","N:13"],["A34","A3","N:17"],["complete","Complete",""]]};
+const sm=k=>STACKS[k]||STACKS.booster,smv=id=>sm((S.vehicles.find(v=>v.id===id)||{}).kind);
 const VC=["#63b58a","#d9748f","#4db5cf","#f3f3f3","#e8a04a","#a58bf0"];let phid=new Set();
 const ORDER=["stack","outfit","proof","raptor","lpt","flight"],DEFDUR={stack:50,outfit:20,proof:4,raptor:30,lpt:3,flight:20}; // last-resort durations (days)
 const PNAME={stack:"stacking",outfit:"outfitting",proof:"cryo proof",raptor:"Raptor integration",lpt:"launch-pad test",flight:"flight prep"};
@@ -122,7 +127,7 @@ function derive(){
  const t0of=id=>{const f=K.find(m=>m.v===id&&m.k==="first");if(f)return ts(f.d);const s=P.filter(p=>p.v===id&&p.t==="stack");return s.length?Math.min(...s.map(p=>ts(p.s))):null};
  const offs=(k,kk)=>{const d=K.filter(m=>m.k===k&&kd(m.v)===kk&&t0of(m.v)!=null).map(m=>({x:(ts(m.d)-t0of(m.v))/D,t:ts(m.d)}));return wavg(d)};
  const stackEst=v=>{const rid=STACK_REF[v.kind];if(!rid||rid===v.id)return null;const rk=K.filter(m=>m.v===rid),sp=done.filter(p=>p.v===rid&&p.t==="stack"),rc=rk.find(m=>m.k==="complete"),rEnd=sp.length?Math.max(...sp.map(p=>ts(p.e))):rc?ts(rc.d):null;if(rEnd==null)return null;
-  let best=null;K.filter(m=>m.v===v.id&&m.k!=="complete").forEach(m=>{const r=rk.find(x=>x.k===m.k);if(!r)return;const c={date:ts(m.d)+(rEnd-ts(r.d)),obs:ts(m.d),src:ts(r.d),k:(STACKM.find(z=>z[0]===m.k)||[0,m.k])[1],rid};if(!best||c.obs>best.obs||(c.obs===best.obs&&c.src>best.src))best=c});return best};
+  let best=null;K.filter(m=>m.v===v.id&&m.k!=="complete").forEach(m=>{const r=rk.find(x=>x.k===m.k);if(!r)return;const c={date:ts(m.d)+(rEnd-ts(r.d)),obs:ts(m.d),src:ts(r.d),k:(sm(v.kind).find(z=>z[0]===m.k)||[0,m.k])[1],rid};if(!best||c.obs>best.obs||(c.obs===best.obs&&c.src>best.src))best=c});return best};
  const o={phases:[],events:[...E],stack:[...K]};
  S.vehicles.forEach(v=>{
   const mine=P.filter(p=>p.v===v.id),has=t=>mine.find(p=>p.t===t);let li=-1;ORDER.forEach((t,i)=>{if(has(t))li=i});
@@ -134,7 +139,7 @@ function derive(){
    const ek={outfit:"cryo",lpt:"static",flight:"launch"}[t];
    if(ek&&!E.some(x=>x.v===v.id&&x.t===ek))o.events.push({v:v.id,t:ek,d:dstr(e),f:1,n:est?"Predicted from matched "+est.k+" progress on "+est.rid+".":"Predicted from "+b.days+"-day "+PNAME[t]+" benchmark set by "+b.src+"."});
    s=e}
-  const t0=t0of(v.id);if(t0!=null){const st=K.filter(m=>m.v===v.id),ks=STACKM.map(m=>m[0]).filter(k=>k!=="first"&&k!=="complete");let la=-1;ks.forEach((k,i)=>{if(st.some(m=>m.k===k))la=i});
+  const t0=t0of(v.id);if(t0!=null){const st=K.filter(m=>m.v===v.id),ks=sm(v.kind).map(m=>m[0]).filter(k=>k!=="first"&&k!=="complete");let la=-1;ks.forEach((k,i)=>{if(st.some(m=>m.k===k))la=i});
    const rid=STACK_REF[v.kind],rk=K.filter(m=>m.v===rid&&rid!==v.id),rd=k=>{const m=rk.find(x=>x.k===k);return m?ts(m.d):null};
    const lk=la>=0?ks[la]:"first",lastObs=Math.max(t0,...st.filter(m=>m.k!=="first").map(m=>ts(m.d)));let prev=lastObs;
    ks.slice(la+1).forEach(k=>{let d=null;const a=rd(k),b0=rd(lk);if(a!=null&&b0!=null)d=lastObs+(a-b0);else{const q=offs(k,v.kind);if(q!=null)d=t0+Math.round(q)*D}
@@ -148,7 +153,8 @@ const KEY="ss-timeline-v2",D=864e5,RH=84,NS="http://www.w3.org/2000/svg";
 const $=i=>document.getElementById(i),ts=s=>+new Date(s+"T00:00:00");
 const fd=(t,o)=>new Date(t).toLocaleDateString("en-GB",o||{day:"numeric",month:"short"}),fy={day:"numeric",month:"short",year:"numeric"};
 function clean(d){d.stack=(d.stack||[]).filter(m=>!m.f);d.phases=d.phases.filter(p=>!p.f);d.events=d.events.filter(e=>!e.f);return d}
-function load(){return clean(JSON.parse(JSON.stringify(SAMPLE)))}
+const DATA_OK=typeof SAMPLE!=="undefined",DATA=DATA_OK?SAMPLE:{updated:new Date().toLocaleDateString("sv-SE"),vehicles:[],stack:[],phases:[],events:[]}; // data.js missing? the page still opens (empty)
+function load(){return clean(JSON.parse(JSON.stringify(DATA)))}
 const iso=()=>new Date().toLocaleDateString("sv-SE");
 function change(){S.updated=iso();snap();refresh()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -202,8 +208,8 @@ function draw(){TT.style.display="none";
 }
 function pace(){
  const p=$("pace");p.innerHTML="";
- const vs=S.vehicles.filter(v=>v.kind===kind&&!v.off),sk=new Set(STACKM.map(m=>m[0]));
- const cats=[...STACKM.map(m=>({k:m[0],n:m[1],s:m[2]})),...["cryo","static","launch"].filter(k=>!phid.has(k)).map(k=>({k,n:ET[k][0],s:""}))];
+ const vs=S.vehicles.filter(v=>v.kind===kind&&!v.off),sk=new Set(sm(kind).map(m=>m[0]));
+ const cats=[...sm(kind).map(m=>({k:m[0],n:m[1],s:m[2]})),...["cryo","static","launch"].filter(k=>!phid.has(k)).map(k=>({k,n:ET[k][0],s:""}))];
  const pts=vs.map((v,vi)=>{const st=X.stack.filter(m=>m.v===v.id),sp=X.phases.filter(q=>q.v===v.id&&q.t==="stack"),get=k=>st.find(m=>m.k===k);
   const f0=get("first"),t0=f0?ts(f0.d):sp.length?Math.min(...sp.map(q=>ts(q.s))):null,a=[];
   if(t0!=null)cats.forEach((c,i)=>{let d,f=0;
@@ -228,23 +234,25 @@ function pace(){
  const pi=mk("div",0,vs.length?"Click a point for details.":"No vehicles selected in this tab.");pi.id="pinfo";pi.style.cssText="min-height:24px;margin:8px 0 0 20px";p.appendChild(pi);
  const ov=mk("div","lg");ov.style.cssText="border-top:1px solid var(--line);margin:18px -20px -18px;padding:16px 20px;align-items:center";
  const h=mk("span",0,"Stacking overlays");h.style.cssText="font-weight:700;margin-right:8px";ov.appendChild(h);
- ["cryo","static","launch"].forEach(k=>{const b=mk("button",phid.has(k)?"off":"");const i=mk("i");i.style.cssText=`background:${ET[k][1]};border-radius:50%`;b.append(i,ET[k][0]);b.onclick=()=>{phid.has(k)?phid.delete(k):phid.add(k);pace()};ov.appendChild(b)});
+ ["cryo","static","launch"].forEach(k=>{const b=mk("button",phid.has(k)?"off":"");const i=mk("i");i.style.cssText=`background:${ET[k][1]};border-radius:50%`;b.append(i,ET[k][0]);b.onclick=()=>{phid.has(k)?phid.delete(k):phid.add(k);pace()};ov.appendChild(b)});const rb=mk("button","rst","Reset filters");rb.style.marginLeft="8px";rb.disabled=!phid.size;rb.onclick=()=>{phid=new Set();pace()};ov.appendChild(rb);
  const pr=mk("span",0,"◇ Predicted milestone");pr.style.cssText="margin-left:auto;color:var(--mute)";ov.appendChild(pr);p.appendChild(ov)}
 function chips(){const c=$("chips");c.innerHTML="";S.vehicles.filter(v=>v.kind===kind).forEach(v=>{const b=mk("button","chip"+(v.off?"":" on"),v.id);b.onclick=()=>{v.off=v.off?0:1;refresh()};c.appendChild(b)})}
 function legend(){const g=$("lg");g.innerHTML="";
  const it=[...Object.entries(PT).map(([k,[n,c]])=>[k,n,`background:${c}`]),["fc","Runtime forecast","background:repeating-linear-gradient(45deg,#fff5 0 2px,#fff2 2px 4px);border:1px dashed #fff8"],
-  ...["cryo","static","launch","issue"].map(k=>[k,ET[k][0],`background:${ET[k][1]};border-radius:50%`])];
+  ...EVL().map(k=>[k,ET[k][0],`background:${ET[k][1]};border-radius:50%`])];
  it.forEach(([k,n,st])=>{const b=mk("button",hid.has(k)?"off":"");const i=mk("i");i.style.cssText=st;b.append(i,n);
-  b.onclick=e=>{if(e.shiftKit||e.shiftKey){hid=new Set(it.map(a=>a[0]).filter(a=>a!==k))}else hid.has(k)?hid.delete(k):hid.add(k);legend();draw()};g.appendChild(b)})}
+  b.onclick=e=>{if(e.shiftKit||e.shiftKey){hid=new Set(it.map(a=>a[0]).filter(a=>a!==k))}else hid.has(k)?hid.delete(k):hid.add(k);legend();draw()};g.appendChild(b)});$("rf").disabled=!hid.size;$("rf").onclick=()=>{hid=new Set();legend();draw()}}
+function fillEt(){const c=$("et").value,v=S.vehicles.find(x=>x.id===$("ev").value),ks=Object.keys(ET).filter(k=>k!=="starlink"||(v&&v.kind==="ship"));$("et").innerHTML=ks.map(k=>`<option value="${k}">${ET[k][0]}</option>`).join("");if(ks.includes(c))$("et").value=c}
+function fillSk(){const c=$("sk").value,l=smv($("sv").value);$("sk").innerHTML=l.map(m=>`<option value="${m[0]}">${m[1]}${m[2]?" "+m[2]:""}</option>`).join("");if(l.some(m=>m[0]===c))$("sk").value=c}
 function editor(){histUI();
  const o=S.vehicles.map(v=>`<option>${v.id}</option>`).join("");document.querySelectorAll(".vsel").forEach(s=>{const c=s.value;s.innerHTML=o;s.value=c||s.value});
  $("pt").innerHTML=Object.entries(PT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");
- $("et").innerHTML=Object.entries(ET).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");
- $("sk").innerHTML=STACKM.map(m=>`<option value="${m[0]}">${m[1]}${m[2]?" "+m[2]:""}</option>`).join("");
+ fillEt();
+ fillSk();
  $("upd").textContent="Updated "+fd(ts(S.updated),fy);
  const tb=$("rows");tb.innerHTML="";const row=(a,rm)=>{const tr=tb.insertRow();a.forEach(t=>tr.insertCell().textContent=t);const b=mk("button",0,"Delete");b.onclick=()=>{rm();change()};tr.insertCell().appendChild(b)};
  S.vehicles.forEach(v=>row([v.id,v.kind,v.sub||"",""],()=>{S.vehicles=S.vehicles.filter(x=>x!==v);S.phases=S.phases.filter(p=>p.v!==v.id);S.events=S.events.filter(e=>e.v!==v.id)}));
- S.stack.forEach(m=>row([m.v,"Stack: "+STACKM.find(a=>a[0]===m.k)[1]+(m.f?" (forecast)":""),m.d,""],()=>S.stack=S.stack.filter(x=>x!==m)));
+ S.stack.forEach(m=>row([m.v,"Stack: "+(smv(m.v).find(a=>a[0]===m.k)||[0,m.k])[1]+(m.f?" (forecast)":""),m.d,""],()=>S.stack=S.stack.filter(x=>x!==m)));
  S.phases.forEach(p=>row([p.v,PT[p.t][0]+(p.f?" (forecast)":""),p.s+" → "+(p.e||"ongoing"),""],()=>S.phases=S.phases.filter(x=>x!==p)));
  S.events.filter(e=>e.t!=="ring"||true).forEach(e=>row([e.v,ET[e.t][0]+(e.f?" (forecast)":""),e.d,e.n||""],()=>S.events=S.events.filter(x=>x!==e)))}
 function refresh(){save();last=JSON.stringify(S);chips();legend();editor();draw()}
@@ -257,12 +265,13 @@ const mid=()=>{const r=$("sc").getBoundingClientRect();return r.left+r.width/2};
 $("zp").onclick=()=>zoomAt(1.3,mid());$("zm").onclick=()=>zoomAt(1/1.3,mid());$("zr").onclick=()=>{zoom=1;$("sc").scrollLeft=0;draw()};
 $("fv").onsubmit=e=>{e.preventDefault();const id=$("vi").value.trim();if(!id||S.vehicles.some(v=>v.id===id))return;S.vehicles.push({id,sub:$("vs").value.trim(),kind:$("vk").value});$("vi").value=$("vs").value="";change()};
 $("fp").onsubmit=e=>{e.preventDefault();S.phases=S.phases.filter(p=>!(p.v===$("pv").value&&p.t===$("pt").value));S.phases.push({v:$("pv").value,t:$("pt").value,s:$("ps").value,e:$("pe").value});change()};
+$("sv").onchange=fillSk;$("ev").onchange=fillEt;
 $("fs").onsubmit=e=>{e.preventDefault();S.stack=S.stack.filter(m=>!(m.v===$("sv").value&&m.k===$("sk").value));S.stack.push({v:$("sv").value,k:$("sk").value,d:$("sd").value});change()};
 $("fe").onsubmit=e=>{e.preventDefault();S.events=S.events.filter(x=>!(x.v===$("ev").value&&x.t===$("et").value&&(x.t!=="ring"||x.d===$("ed").value)));S.events.push({v:$("ev").value,t:$("et").value,d:$("ed").value,n:$("en").value.trim()});$("en").value="";change()};
 $("ex").onclick=()=>{$("io").hidden=false;$("io").value=JSON.stringify(S,null,1);$("io").select()};
 $("im").onclick=()=>{const io=$("io");if(io.hidden||!io.value.trim()){io.hidden=false;io.value="";io.placeholder="Paste JSON and click Import again";return}
  try{const d=JSON.parse(io.value);if(d.vehicles&&d.phases&&d.events){snap();S=clean(d);S.updated=S.updated||iso();io.hidden=true;refresh()}}catch(x){io.value="Invalid JSON"}};
-$("rs").onclick=()=>{snap();S=JSON.parse(JSON.stringify(SAMPLE));refresh()};
+$("rs").onclick=()=>{snap();S=JSON.parse(JSON.stringify(DATA));refresh()};
 let dr=null;const sc=$("sc");sc.onmousedown=e=>dr={x:e.clientX,l:sc.scrollLeft};addEventListener("mouseup",()=>dr=null);addEventListener("mousemove",e=>{if(dr)sc.scrollLeft=dr.l-(e.clientX-dr.x)});
 sc.style.touchAction="pan-x";
 sc.addEventListener("wheel",e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY))return;e.preventDefault();
@@ -282,7 +291,7 @@ function shot(){
  const ser=new XMLSerializer().serializeToString(c);if(!isP&&zs!==1){zoom=zs;draw()}
  let items=[];
  if(isP){vs.forEach((v,i)=>items.push({k:"line",c:VC[i%VC.length],t:v.id}));items.push({k:"dia",c:"#fff",t:"Predicted milestone"});["cryo","static","launch"].filter(k=>!phid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
- else{Object.entries(PT).filter(([k])=>!hid.has(k)).forEach(([k,v])=>items.push({k:"box",c:v[1],t:v[0]}));if(!hid.has("fc"))items.push({k:"hatch",c:"#888",t:"Runtime forecast"});["cryo","static","launch","issue"].filter(k=>!hid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
+ else{Object.entries(PT).filter(([k])=>!hid.has(k)).forEach(([k,v])=>items.push({k:"box",c:v[1],t:v[0]}));if(!hid.has("fc"))items.push({k:"hatch",c:"#888",t:"Runtime forecast"});EVL().filter(k=>!hid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
  let x=24,y=HH+ch+30,lg="";
  items.forEach(it=>{const w=it.t.length*6.6+44;if(x+w>W-12){x=24;y+=26}
   const cy=y-4;
@@ -316,4 +325,5 @@ function go(p){page=p;try{location.hash=p==="settings"?"settings":""}catch(e){}r
 $("upd").onclick=e=>{if(e.detail===3)go("settings")};$("back").onclick=e=>{e.preventDefault();go("view")};
 addEventListener("hashchange",()=>{page=location.hash==="#settings"?"settings":"view";route()});
 addEventListener("resize",draw);refresh();route();
+if(!DATA_OK){const b=document.createElement("div");b.style.cssText="background:#3a1d1d;border:1px solid #7a2e2e;color:#ffd6d6;border-radius:10px;padding:12px 14px;margin-bottom:16px";b.textContent="data.js could not be loaded. Put data.js in the same folder as index.html (exact name, lowercase) and reload.";$("view").prepend(b)}
 </script></body></html>
