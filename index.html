@@ -46,7 +46,15 @@ form>button{background:var(--acc);border-color:var(--acc);font-weight:600}
 .tw{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mute);font-weight:500}
 footer{display:flex;justify-content:space-between;color:var(--mute);font-size:12px;padding:0 4px;gap:10px;flex-wrap:wrap}
 @media(max-width:640px){.lab{flex-basis:96px;padding-left:12px}}
-a{color:var(--acc)}.back{display:inline-block;margin-bottom:6px}.lr input{width:100%}footer b,footer a{color:var(--ink);font-weight:600;text-decoration:none}footer a:hover{text-decoration:underline}footer{line-height:1.7}</style></head><body><main>
+a{color:var(--acc)}.back{display:inline-block;margin-bottom:6px}.lr input{width:100%}footer b,footer a{color:var(--ink);font-weight:600;text-decoration:none}footer a:hover{text-decoration:underline}footer{line-height:1.7}#tl,#pace,#view>.card{background:#151b25}
+button{transition:filter .12s,background .12s,color .12s}
+button:not(:disabled):hover{filter:brightness(1.25)}
+.chip.on:hover{filter:brightness(1.1)}.seg button:not(.on):hover{color:#fff;background:#ffffff12}
+.lg button:hover{background:#ffffff14}.lg button.off:hover{opacity:.7}
+#svg [style*="pointer"]:hover,#pace svg [style*="pointer"]:hover{filter:brightness(1.35) drop-shadow(0 0 3px #fff7)}
+#tt{position:fixed;display:none;z-index:50;pointer-events:none;background:#1b222d;border:1px solid #2d3644;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.5;max-width:330px;box-shadow:0 8px 24px #0009}
+#tt b{display:block;color:#fff;margin-bottom:2px}#tt div{color:#cfd4dc}
+</style></head><body><main>
 <div id="view">
 <header><h1 id="h1">Starship Booster Production Timeline</h1><div class="upd" id="upd"></div></header>
 
@@ -71,7 +79,7 @@ a{color:var(--acc)}.back{display:inline-block;margin-bottom:6px}.lr input{width:
 <div id="setc">
 <div class="card ed"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="un">Undo</button><button id="re">Redo</button><span style="color:var(--mute)">Undo or redo your changes (until you reload the page).</span></div></div>
 <div class="card ed">
- <h2>Enter milestones</h2><p>Everything is stored in your browser. Export a JSON backup. Forecasts are calculated automatically from earlier timelines (weighted average: recent vehicles count more, outliers count less). Entering the same vehicle + phase/milestone/event again replaces the old entry. Leave End empty for a phase that is still in progress.</p>
+ <h2>Enter milestones</h2><p>Everything is stored in your browser. Export a JSON backup. Forecasts use the same method as starship-timeline.pages.dev: a fastest-benchmark duration per phase, with stacking matched against a reference vehicle (edit BENCH / STACK_REF at the top of the script). Entering the same vehicle + phase/milestone/event again replaces the old entry. Leave End empty for a phase that is still in progress.</p>
  <form id="fv"><label>Vehicle ID<input id="vi" placeholder="B25 or S42" required></label><label>Description<input id="vs" placeholder="Stacking"></label>
   <label>Type<select id="vk"><option value="booster">Booster</option><option value="ship">Ship</option></select></label><button>Add vehicle</button></form>
  <form id="fp"><label>Vehicle<select class="vsel" id="pv"></select></label><label>Phase<select id="pt"></select></label>
@@ -95,34 +103,42 @@ const ET={ring:["Stack progress","#ffffff"],cryo:["Cryo","#2b8fc0"],static:["Sta
 // Stacking milestones for the pace chart: [key, name, sublabel]. Edit freely.
 const STACKM=[["first","First section",""],["A3","A3","M:11"],["A4","A4","M:15"],["A5","A5","M:19"],["A6","A6","M:23"],["AX","AX","A:25"],["F2","F2",""],["FX","FX","F:7"],["F3","F3","F:11"],["complete","Complete",""]];
 const VC=["#63b58a","#d9748f","#4db5cf","#f3f3f3","#e8a04a","#a58bf0"];let phid=new Set();
-const ORDER=["stack","outfit","proof","raptor","lpt","flight"],DEFDUR={stack:50,outfit:20,proof:4,raptor:30,lpt:3,flight:20}; // fallback durations (days) when no earlier vehicle has finished a phase
+const ORDER=["stack","outfit","proof","raptor","lpt","flight"],DEFDUR={stack:50,outfit:20,proof:4,raptor:30,lpt:3,flight:20}; // last-resort durations (days)
+const PNAME={stack:"stacking",outfit:"outfitting",proof:"cryo proof",raptor:"Raptor integration",lpt:"launch-pad test",flight:"flight prep"};
+// PREDICTION: same method as starship-timeline.pages.dev. Every phase gets a fixed "fastest comparable" duration (BENCH: days + source vehicle).
+// Stacking is milestone-matched against a reference vehicle (STACK_REF): latest observed milestone + the reference's remaining days to stack complete.
+// Kinds without a BENCH entry use the fastest completed phase found in the data. Edit BENCH / STACK_REF freely.
+const BENCH={booster:{stack:{days:46,src:"B22"},outfit:{days:15,src:"B18"},proof:{days:3,src:"B20"},raptor:{days:28,src:"B19"},lpt:{days:3,src:"B20"},flight:{days:12,src:"B20"}},ship:{}};
+const STACK_REF={booster:"B22",ship:""};
 const dstr=t=>new Date(t+432e5).toLocaleDateString("sv-SE");let X={phases:[],events:[],stack:[]};
-// Forecasts: weighted average of earlier vehicles of the same kind (recent ones count more, outliers count less). phase durations / stacking offsets of earlier vehicles of the same kind.
-const wavg=a=>{ // robust + recency-weighted mean of [{x,t}]: outliers count less, newer values count more
+const wavg=a=>{ // robust + recency-weighted mean of [{x,t}] (only used as fallback for pace-chart milestones)
  if(!a.length)return null;a=[...a].sort((p,q)=>p.t-q.t);const n=a.length;if(n===1)return a[0].x;
  const md=l=>{const s=[...l].sort((p,q)=>p-q),m=(s.length-1)/2;return(s[Math.floor(m)]+s[Math.ceil(m)])/2};
  const med=md(a.map(q=>q.x)),sc=Math.max(1.4826*md(a.map(q=>Math.abs(q.x-med))),.15*Math.abs(med),1);let sw=0,sx=0;
  a.forEach((q,i)=>{const w=Math.pow(2,1.5*i/(n-1))/(1+Math.pow((q.x-med)/(2*sc),2));sw+=w;sx+=w*q.x});return sx/sw};
 function derive(){
- const td=ts(iso()),bd=ts(S.updated),P=S.phases,E=S.events,K=S.stack,kd=id=>(S.vehicles.find(v=>v.id===id)||{}).kind,done=P.filter(p=>p.e);
- const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
- const avg=(k,t)=>{const r=wavg(done.filter(p=>p.t===t&&kd(p.v)===k).map(p=>({x:(ts(p.e)-ts(p.s))/D,t:ts(p.e)})));return Math.round(r==null?DEFDUR[t]:r)};
+ const bd=ts(S.updated),P=S.phases,E=S.events,K=S.stack,kd=id=>(S.vehicles.find(v=>v.id===id)||{}).kind,done=P.filter(p=>p.e);
+ const bench=(k,t)=>{const b=(BENCH[k]||{})[t];if(b)return b;let best=null;done.forEach(p=>{if(p.t!==t||kd(p.v)!==k)return;const d=Math.round((ts(p.e)-ts(p.s))/D);if(!best||d<best.days)best={days:d,src:p.v}});return best||{days:DEFDUR[t],src:"default"}};
  const t0of=id=>{const f=K.find(m=>m.v===id&&m.k==="first");if(f)return ts(f.d);const s=P.filter(p=>p.v===id&&p.t==="stack");return s.length?Math.min(...s.map(p=>ts(p.s))):null};
  const offs=(k,kk)=>{const d=K.filter(m=>m.k===k&&kd(m.v)===kk&&t0of(m.v)!=null).map(m=>({x:(ts(m.d)-t0of(m.v))/D,t:ts(m.d)}));return wavg(d)};
+ const stackEst=v=>{const rid=STACK_REF[v.kind];if(!rid||rid===v.id)return null;const rk=K.filter(m=>m.v===rid),sp=done.filter(p=>p.v===rid&&p.t==="stack"),rc=rk.find(m=>m.k==="complete"),rEnd=sp.length?Math.max(...sp.map(p=>ts(p.e))):rc?ts(rc.d):null;if(rEnd==null)return null;
+  let best=null;K.filter(m=>m.v===v.id&&m.k!=="complete").forEach(m=>{const r=rk.find(x=>x.k===m.k);if(!r)return;const c={date:ts(m.d)+(rEnd-ts(r.d)),obs:ts(m.d),src:ts(r.d),k:(STACKM.find(z=>z[0]===m.k)||[0,m.k])[1],rid};if(!best||c.obs>best.obs||(c.obs===best.obs&&c.src>best.src))best=c});return best};
  const o={phases:[],events:[...E],stack:[...K]};
  S.vehicles.forEach(v=>{
   const mine=P.filter(p=>p.v===v.id),has=t=>mine.find(p=>p.t===t);let li=-1;ORDER.forEach((t,i)=>{if(has(t))li=i});
   mine.forEach(p=>o.phases.push(p.e?p:{...p,e:dstr(Math.max(ts(p.s),bd))}));
   if(li<0||E.some(e=>e.v===v.id&&e.t==="launch"))return;
-  const ends={};let cur,first=true;mine.forEach(p=>{if(p.e)ends[p.t]=ts(p.e)});
-  const put=(t,s)=>{let e=s+avg(v.kind,t)*D;if(first&&e<=td)e=td+D;first=false;o.phases.push({v:v.id,t,s:dstr(s),e:dstr(e),f:1});return e};
-  const last=has(ORDER[li]);
-  if(last.e)cur=ts(last.e);else{let e=ts(last.s)+avg(v.kind,ORDER[li])*D;if(e<=td)e=td+D;first=false;o.phases.push({v:v.id,t:ORDER[li],s:dstr(Math.max(ts(last.s),bd)),e:dstr(e),f:1});ends[ORDER[li]]=e;cur=e}
-  for(let i=li+1;i<6;i++){cur=put(ORDER[i],cur);ends[ORDER[i]]=cur}
-  [["proof","cryo"],["lpt","static"],["flight","launch"]].forEach(([t,k])=>{if(ends[t]!=null&&ends[t]>=bd&&!E.some(e=>e.v===v.id&&e.t===k))o.events.push({v:v.id,t:k,d:dstr(ends[t]),n:"",f:1})});
+  const last=has(ORDER[li]);let s=last.e?ts(last.e):ts(last.s);
+  for(let i=last.e?li+1:li;i<6;i++){const t=ORDER[i],b=bench(v.kind,t),est=t==="stack"?stackEst(v):null,g=est?est.date:s+b.days*D,e=Math.max(g,bd),s0=Math.max(s,bd);
+   if(e>s0)o.phases.push({v:v.id,t,s:dstr(s0),e:dstr(e),f:1,n:(est?"Milestone-matched estimate from "+est.k+" progress on "+est.rid+".":"Fastest comparable interval from "+b.src+".")+" Duration: "+Math.round((e-s0)/D)+" days."});
+   const ek={outfit:"cryo",lpt:"static",flight:"launch"}[t];
+   if(ek&&!E.some(x=>x.v===v.id&&x.t===ek))o.events.push({v:v.id,t:ek,d:dstr(e),f:1,n:est?"Predicted from matched "+est.k+" progress on "+est.rid+".":"Predicted from "+b.days+"-day "+PNAME[t]+" benchmark set by "+b.src+"."});
+   s=e}
   const t0=t0of(v.id);if(t0!=null){const st=K.filter(m=>m.v===v.id),ks=STACKM.map(m=>m[0]).filter(k=>k!=="first"&&k!=="complete");let la=-1;ks.forEach((k,i)=>{if(st.some(m=>m.k===k))la=i});
-   let prev=Math.max(t0,...st.filter(m=>m.k!=="first").map(m=>ts(m.d)));
-   ks.slice(la+1).forEach(k=>{const q=offs(k,v.kind);if(q==null)return;prev=Math.max(t0+Math.round(q)*D,prev,bd);o.stack.push({v:v.id,k,d:dstr(prev),f:1})})}});
+   const rid=STACK_REF[v.kind],rk=K.filter(m=>m.v===rid&&rid!==v.id),rd=k=>{const m=rk.find(x=>x.k===k);return m?ts(m.d):null};
+   const lk=la>=0?ks[la]:"first",lastObs=Math.max(t0,...st.filter(m=>m.k!=="first").map(m=>ts(m.d)));let prev=lastObs;
+   ks.slice(la+1).forEach(k=>{let d=null;const a=rd(k),b0=rd(lk);if(a!=null&&b0!=null)d=lastObs+(a-b0);else{const q=offs(k,v.kind);if(q!=null)d=t0+Math.round(q)*D}
+    if(d==null)return;prev=Math.max(d,prev,bd);o.stack.push({v:v.id,k,d:dstr(prev),f:1})})}});
  return o}
 
 // Settings lock: the PIN is stored only as a salted PBKDF2 hash (not readable in the source). Empty PIN_HASH = no lock. Client-side only, so no replacement for server-side protection.
@@ -146,7 +162,11 @@ const mk=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=nu
 const sv=(n,a,p,t)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;p.appendChild(e);return e};
 const info=t=>$("info").textContent=t;
 
-function draw(){
+const TT=document.createElement("div");TT.id="tt";document.body.appendChild(TT);
+function tipOn(el,lines){const mv=e=>{const w=TT.offsetWidth,h=TT.offsetHeight;let x=e.clientX+14,y=e.clientY+16;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;TT.style.left=Math.max(8,x)+"px";TT.style.top=Math.max(8,y)+"px"};
+ el.addEventListener("mouseenter",e=>{TT.innerHTML="";TT.appendChild(mk("b",0,lines[0]));lines.slice(1).filter(Boolean).forEach(t=>TT.appendChild(mk("div",0,t)));TT.style.display="block";mv(e)});
+ el.addEventListener("mousemove",mv);el.addEventListener("mouseleave",()=>TT.style.display="none")}
+function draw(){TT.style.display="none";
  const vs=S.vehicles.filter(v=>v.kind===kind&&!v.off),ids=vs.map(v=>v.id);
  X=derive();const ph=X.phases.filter(p=>ids.includes(p.v)),ev=X.events.filter(e=>ids.includes(e.v));
  const now=Date.now(),all=[now,ts(S.updated),...ph.flatMap(p=>[ts(p.s),ts(p.e)]),...ev.map(e=>ts(e.d))];
@@ -168,13 +188,13 @@ function draw(){
    if(p.f){sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c,opacity:.55},g);sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:"url(#h)",stroke:"#ffffff77","stroke-dasharray":"4 3"},g)}
    else sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c},g);
    const nm=PT[p.t][2]??""; if(nm&&w>nm.length*6.5+10)sv("text",{x:x1+7,y:y0+48,class:"lb"},g,nm);
-   g.onclick=()=>info(`${v.id} · ${PT[p.t][0]} · ${fd(ts(p.s),fy)} → ${fd(ts(p.e),fy)}${p.f?" · forecast":""}`)});
+   tipOn(g,[v.id+" · "+PT[p.t][0],fd(ts(p.s),fy)+" → "+fd(ts(p.e),fy)+" ("+Math.round((ts(p.e)-ts(p.s))/D)+" days)"+(p.f?" · forecast":""),p.n||""]);g.onclick=()=>info(`${v.id} · ${PT[p.t][0]} · ${fd(ts(p.s),fy)} → ${fd(ts(p.e),fy)}${p.f?" · forecast":""}${p.n?" · "+p.n:""}`)});
   ev.filter(e=>e.v===v.id&&!hid.has(e.t)&&!(e.f&&hid.has("fc"))).forEach(e=>{
    const cx=x(ts(e.d)),ring=e.t==="ring",cy=y0+(ring?18:70),c=ET[e.t][1];
    const n=ring?sv("circle",{cx,cy,r:5,fill:"none",stroke:"#fff","stroke-width":1.6},svg)
     :e.f?sv("rect",{x:cx-7,y:cy-7,width:14,height:14,transform:`rotate(45 ${cx} ${cy})`,rx:2,fill:"#10141b",stroke:c,"stroke-width":2,"stroke-dasharray":"3 2"},svg)
     :sv("circle",{cx,cy,r:8,fill:c,stroke:"#10141b","stroke-width":2},svg);
-   n.style.cursor="pointer";n.onclick=()=>info(`${v.id} · ${ET[e.t][0]} · ${fd(ts(e.d),fy)}${e.f?" · forecast":""}${e.n?" · "+e.n:""}`)})});
+   n.style.cursor="pointer";tipOn(n,[v.id+" · "+ET[e.t][0],fd(ts(e.d),fy)+(e.f?" · forecast":""),e.n||""]);n.onclick=()=>info(`${v.id} · ${ET[e.t][0]} · ${fd(ts(e.d),fy)}${e.f?" · forecast":""}${e.n?" · "+e.n:""}`)})});
  const tx=x(now);sv("line",{x1:tx,x2:tx,y1:22,y2:H,stroke:"#ff5a36","stroke-width":2},svg);sv("text",{x:tx+6,y:44,style:"fill:#ff5a36;font-weight:600"},svg,"Today "+fd(now));
  const ux=x(ts(S.updated));sv("line",{x1:ux,x2:ux,y1:22,y2:H,stroke:"#fff","stroke-dasharray":"3 3","stroke-opacity":.7},svg);sv("text",{x:ux-6,y:44,"text-anchor":"end"},svg,"Updated "+fd(ts(S.updated)));
  if(!vs.length)info(S.vehicles.some(v=>v.kind===kind)?"Select at least one vehicle.":"No vehicles in this tab yet. Add one below.");
@@ -204,7 +224,7 @@ function pace(){
   sv("text",{x:x(i),y:H-B+18,"text-anchor":"middle",style:"font-weight:600"},svg,c.n);if(c.s)sv("text",{x:x(i),y:H-B+30,"text-anchor":"middle"},svg,c.s)});
  pts.forEach(o=>{o.a.forEach((q,j)=>{if(j){const r=o.a[j-1];sv("line",{x1:x(r.i),y1:y(r.n),x2:x(q.i),y2:y(q.n),stroke:o.c,"stroke-width":2,"stroke-dasharray":q.f?"5 4":"none"},svg)}});
   o.a.forEach(q=>{const cx=x(q.i),cy=y(q.n),m=q.f?sv("rect",{x:cx-5,y:cy-5,width:10,height:10,transform:`rotate(45 ${cx} ${cy})`,fill:"#10141b",stroke:o.c,"stroke-width":2,"stroke-dasharray":"2 2"},svg):sv("circle",{cx,cy,r:5,fill:"#10141b",stroke:o.c,"stroke-width":2},svg);
-   m.style.cursor="pointer";m.onclick=()=>$("pinfo").textContent=`${o.v.id} · ${q.c.n}${q.c.s?" ("+q.c.s+")":""} · ${fd(q.d,fy)} · ${q.n} days after first section${q.f?" · forecast":""}`})});
+   m.style.cursor="pointer";tipOn(m,[o.v.id+" · "+q.c.n+(q.c.s?" ("+q.c.s+")":""),fd(q.d,fy)+" · "+q.n+" days after first section"+(q.f?" · forecast":"")]);m.onclick=()=>$("pinfo").textContent=`${o.v.id} · ${q.c.n}${q.c.s?" ("+q.c.s+")":""} · ${fd(q.d,fy)} · ${q.n} days after first section${q.f?" · forecast":""}`})});
  const pi=mk("div",0,vs.length?"Click a point for details.":"No vehicles selected in this tab.");pi.id="pinfo";pi.style.cssText="min-height:24px;margin:8px 0 0 20px";p.appendChild(pi);
  const ov=mk("div","lg");ov.style.cssText="border-top:1px solid var(--line);margin:18px -20px -18px;padding:16px 20px;align-items:center";
  const h=mk("span",0,"Stacking overlays");h.style.cssText="font-weight:700;margin-right:8px";ov.appendChild(h);
