@@ -54,7 +54,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
 #svg [style*="pointer"]:hover,#pace svg [style*="pointer"]:hover{filter:brightness(1.35) drop-shadow(0 0 3px #fff7)}
 #tt{position:fixed;display:none;z-index:50;pointer-events:none;background:#1b222d;border:1px solid #2d3644;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.5;max-width:330px;box-shadow:0 8px 24px #0009}
 #tt b{display:block;color:#fff;margin-bottom:2px}#tt div{color:#cfd4dc}
-.lg .rst{margin-left:auto;border:1px solid var(--line);color:var(--ink)}.lg .rst:disabled{opacity:.4;cursor:default}.lh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.lh p{margin:0!important}.lh .rst{border:1px solid var(--line);color:var(--ink)}.lh .rst:disabled{opacity:.4;cursor:default}</style></head><body><main>
+.lg .rst{margin-left:auto;border:1px solid var(--line);color:var(--ink)}.lg .rst:disabled{opacity:.4;cursor:default}.lh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}.lh p{margin:0!important}.lh .rst{border:1px solid var(--line);color:var(--ink)}.lh .rst:disabled{opacity:.4;cursor:default}.cx{background:var(--chip)!important;border-color:var(--line)!important}</style></head><body><main>
 <div id="view">
 <header><h1 id="h1">Starship Booster Production Timeline</h1><div class="upd" id="upd"></div></header>
 
@@ -89,6 +89,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
  <form id="fe"><label>Vehicle<select class="vsel" id="ev"></select></label><label>Event<select id="et"></select></label>
   <label>Date<input type="date" id="ed" required></label><label>Note<input id="en" placeholder="optional"></label>
   <button>Add event</button></form>
+ <div style="margin-bottom:10px"><select id="tf"></select></div>
  <div class="tw"><table><thead><tr><th>Vehicle</th><th>Type</th><th>When</th><th>Note</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
   <button id="ex">Export JSON</button><button id="im">Import JSON</button><button id="rs">Reset to sample data</button></div>
@@ -246,17 +247,28 @@ function legend(){const g=$("lg");g.innerHTML="";
   b.onclick=e=>{if(e.shiftKit||e.shiftKey){hid=new Set(it.map(a=>a[0]).filter(a=>a!==k))}else hid.has(k)?hid.delete(k):hid.add(k);legend();draw()};g.appendChild(b)});$("rf").disabled=!hid.size;$("rf").onclick=()=>{hid=new Set();legend();draw()}}
 function fillEt(){const c=$("et").value,v=S.vehicles.find(x=>x.id===$("ev").value),ks=Object.keys(ET).filter(k=>k!=="starlink"||(v&&v.kind==="ship"));$("et").innerHTML=ks.map(k=>`<option value="${k}">${ET[k][0]}</option>`).join("");if(ks.includes(c))$("et").value=c}
 function fillSk(){const c=$("sk").value,l=smv($("sv").value);$("sk").innerHTML=l.map(m=>`<option value="${m[0]}">${m[1]}${m[2]?" "+m[2]:""}</option>`).join("");if(l.some(m=>m[0]===c))$("sk").value=c}
+let editing=null,tf="";
+const FM={v:["fv","Update vehicle"],s:["fs","Update stacking milestone"],p:["fp","Update phase"],e:["fe","Update event"]};
+function endEdit(){if(!editing)return;const f=$(FM[editing.k][0]),b=f.querySelector("button");if(b.dataset.t)b.textContent=b.dataset.t;const c=f.querySelector(".cx");if(c)c.remove();editing=null}
+function startEdit(k,o){endEdit();editing={k,o};const f=$(FM[k][0]),b=f.querySelector("button");b.dataset.t=b.textContent;b.textContent=FM[k][1];
+ const c=mk("button","cx","Cancel");c.type="button";c.onclick=endEdit;f.appendChild(c);
+ if(k==="v"){$("vi").value=o.id;$("vs").value=o.sub||"";$("vk").value=o.kind}
+ if(k==="p"){$("pv").value=o.v;$("pt").value=o.t;$("ps").value=o.s;$("pe").value=o.e||""}
+ if(k==="s"){$("sv").value=o.v;fillSk();$("sk").value=o.k;$("sd").value=o.d}
+ if(k==="e"){$("ev").value=o.v;fillEt();$("et").value=o.t;$("ed").value=o.d;$("en").value=o.n||""}
+ f.scrollIntoView({behavior:"smooth",block:"center"})}
 function editor(){histUI();
  const o=S.vehicles.map(v=>`<option>${v.id}</option>`).join("");document.querySelectorAll(".vsel").forEach(s=>{const c=s.value;s.innerHTML=o;s.value=c||s.value});
  $("pt").innerHTML=Object.entries(PT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");
  fillEt();
  fillSk();
  $("upd").textContent="Updated "+fd(ts(S.updated),fy);
- const tb=$("rows");tb.innerHTML="";const row=(a,rm)=>{const tr=tb.insertRow();a.forEach(t=>tr.insertCell().textContent=t);const b=mk("button",0,"Delete");b.onclick=()=>{rm();change()};tr.insertCell().appendChild(b)};
- S.vehicles.forEach(v=>row([v.id,v.kind,v.sub||"",""],()=>{S.vehicles=S.vehicles.filter(x=>x!==v);S.phases=S.phases.filter(p=>p.v!==v.id);S.events=S.events.filter(e=>e.v!==v.id)}));
- S.stack.forEach(m=>row([m.v,"Stack: "+(smv(m.v).find(a=>a[0]===m.k)||[0,m.k])[1]+(m.f?" (forecast)":""),m.d,""],()=>S.stack=S.stack.filter(x=>x!==m)));
- S.phases.forEach(p=>row([p.v,PT[p.t][0]+(p.f?" (forecast)":""),p.s+" → "+(p.e||"ongoing"),""],()=>S.phases=S.phases.filter(x=>x!==p)));
- S.events.filter(e=>e.t!=="ring"||true).forEach(e=>row([e.v,ET[e.t][0]+(e.f?" (forecast)":""),e.d,e.n||""],()=>S.events=S.events.filter(x=>x!==e)))}
+ const tb=$("rows");tb.innerHTML="";const tfs=$("tf"),cur=tf;tfs.innerHTML='<option value="">All vehicles</option>'+S.vehicles.map(v=>`<option>${v.id}</option>`).join("");tfs.value=cur;tf=tfs.value;
+ const row=(a,rm,ed)=>{if(tf&&a[0]!==tf)return;const tr=tb.insertRow();a.forEach(t=>tr.insertCell().textContent=t);const c=tr.insertCell();if(ed){const e2=mk("button",0,"Edit");e2.onclick=ed;c.append(e2," ")}const b=mk("button",0,"Delete");b.onclick=()=>{rm();change()};c.appendChild(b)};
+ S.vehicles.forEach(v=>row([v.id,v.kind,v.sub||"",""],()=>{S.vehicles=S.vehicles.filter(x=>x!==v);S.phases=S.phases.filter(p=>p.v!==v.id);S.events=S.events.filter(e=>e.v!==v.id);S.stack=S.stack.filter(m=>m.v!==v.id)},()=>startEdit("v",v)));
+ S.stack.forEach(m=>row([m.v,"Stack: "+(smv(m.v).find(a=>a[0]===m.k)||[0,m.k])[1]+(m.f?" (forecast)":""),m.d,""],()=>S.stack=S.stack.filter(x=>x!==m),()=>startEdit("s",m)));
+ S.phases.forEach(p=>row([p.v,(PT[p.t]||[p.t])[0]+(p.f?" (forecast)":""),p.s+" → "+(p.e||"ongoing"),""],()=>S.phases=S.phases.filter(x=>x!==p),()=>startEdit("p",p)));
+ S.events.filter(e=>e.t!=="ring"||true).forEach(e=>row([e.v,(ET[e.t]||[e.t])[0]+(e.f?" (forecast)":""),e.d,e.n||""],()=>S.events=S.events.filter(x=>x!==e),()=>startEdit("e",e)))}
 function refresh(){save();last=JSON.stringify(S);chips();legend();editor();draw()}
 $("tabs").onclick=e=>{const k=e.target.dataset.k;if(!k)return;kind=k;zoom=1;$("sc").scrollLeft=0;[...$("tabs").children].forEach(b=>b.classList.toggle("on",b===e.target));
  $("h1").textContent=k==="ship"?"Starship Ship Production Timeline":"Starship Booster Production Timeline";$("vk").value=k;info("Click a bar or icon for details.");refresh()};
@@ -265,11 +277,14 @@ function zoomAt(f,cx){const sc=$("sc"),svg=$("svg"),W0=+svg.getAttribute("width"
  zoom=Math.min(20,Math.max(1,zoom*f));draw();sc.scrollLeft=fr*(+svg.getAttribute("width"))-mx}
 const mid=()=>{const r=$("sc").getBoundingClientRect();return r.left+r.width/2};
 $("zp").onclick=()=>zoomAt(1.3,mid());$("zm").onclick=()=>zoomAt(1/1.3,mid());$("zr").onclick=()=>{zoom=1;$("sc").scrollLeft=0;draw()};
-$("fv").onsubmit=e=>{e.preventDefault();const id=$("vi").value.trim();if(!id||S.vehicles.some(v=>v.id===id))return;S.vehicles.push({id,sub:$("vs").value.trim(),kind:$("vk").value});$("vi").value=$("vs").value="";change()};
-$("fp").onsubmit=e=>{e.preventDefault();S.phases=S.phases.filter(p=>!(p.v===$("pv").value&&p.t===$("pt").value));S.phases.push({v:$("pv").value,t:$("pt").value,s:$("ps").value,e:$("pe").value});change()};
-$("sv").onchange=fillSk;$("ev").onchange=fillEt;
-$("fs").onsubmit=e=>{e.preventDefault();S.stack=S.stack.filter(m=>!(m.v===$("sv").value&&m.k===$("sk").value));S.stack.push({v:$("sv").value,k:$("sk").value,d:$("sd").value});change()};
-$("fe").onsubmit=e=>{e.preventDefault();S.events=S.events.filter(x=>!(x.v===$("ev").value&&x.t===$("et").value&&(x.t!=="ring"||x.d===$("ed").value)));S.events.push({v:$("ev").value,t:$("et").value,d:$("ed").value,n:$("en").value.trim()});$("en").value="";change()};
+$("fv").onsubmit=e=>{e.preventDefault();const id=$("vi").value.trim(),ed=editing&&editing.k==="v"?editing.o:null;if(!id||S.vehicles.some(v=>v.id===id&&v!==ed))return;
+ if(ed){const old=ed.id;[S.phases,S.events,S.stack].forEach(a=>a.forEach(x=>{if(x.v===old)x.v=id}));ed.id=id;ed.sub=$("vs").value.trim();ed.kind=$("vk").value}
+ else S.vehicles.push({id,sub:$("vs").value.trim(),kind:$("vk").value});
+ $("vi").value=$("vs").value="";endEdit();change()};
+$("fp").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="p"?editing.o:null;S.phases=S.phases.filter(p=>p!==ed&&!(p.v===$("pv").value&&p.t===$("pt").value));S.phases.push({v:$("pv").value,t:$("pt").value,s:$("ps").value,e:$("pe").value});endEdit();change()};
+$("tf").onchange=()=>{tf=$("tf").value;editor()};$("sv").onchange=fillSk;$("ev").onchange=fillEt;
+$("fs").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="s"?editing.o:null;S.stack=S.stack.filter(m=>m!==ed&&!(m.v===$("sv").value&&m.k===$("sk").value));S.stack.push({v:$("sv").value,k:$("sk").value,d:$("sd").value});endEdit();change()};
+$("fe").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="e"?editing.o:null;S.events=ed?S.events.filter(x=>x!==ed):S.events.filter(x=>!(x.v===$("ev").value&&x.t===$("et").value&&(x.t!=="ring"||x.d===$("ed").value)));S.events.push({v:$("ev").value,t:$("et").value,d:$("ed").value,n:$("en").value.trim()});$("en").value="";endEdit();change()};
 $("ex").onclick=()=>{$("io").hidden=false;$("io").value=JSON.stringify(S,null,1);$("io").select()};
 $("im").onclick=()=>{const io=$("io");if(io.hidden||!io.value.trim()){io.hidden=false;io.value="";io.placeholder="Paste JSON and click Import again";return}
  try{const d=JSON.parse(io.value);if(d.vehicles&&d.phases&&d.events){snap();S=clean(d);S.updated=S.updated||iso();io.hidden=true;refresh()}}catch(x){io.value="Invalid JSON"}};
