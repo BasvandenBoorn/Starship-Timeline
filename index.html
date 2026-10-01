@@ -88,6 +88,7 @@ a{color:var(--acc)}.back{display:inline-block;margin-bottom:6px}.lr input{width:
 </div>
 
 </div></div></main>
+<script src="data.js"></script>
 <script>
 const PT={stack:["Stacking","#2f6650","Stack"],outfit:["Outfitting / wait","#6e5626","Outfit"],raptor:["Raptor integration","#84591a","Raptors"],proof:["Proof / cryo","#2f5568"],lpt:["Launch-pad tests","#6a4a3a"],flight:["Flight integration","#57467e","Flight prep"]};
 const ET={ring:["Stack progress","#ffffff"],cryo:["Cryo","#2b8fc0"],static:["Static fire","#d9702a"],launch:["Launch","#7c5fcf"],issue:["Issue","#d9473f"]};
@@ -124,33 +125,6 @@ function derive(){
    ks.slice(la+1).forEach(k=>{const q=offs(k,v.kind);if(q==null)return;prev=Math.max(t0+Math.round(q)*D,prev,bd);o.stack.push({v:v.id,k,d:dstr(prev),f:1})})}});
  return o}
 
-// ===== HOSTING: replace SAMPLE below with your exported JSON and re-upload this file.
-// Still seeing old data after uploading? Your browser remembers your input: bump KEY (e.g. "ss-timeline-v3") or click "Reset to sample data".
-// ===== SAMPLE DATA (phase: v=vehicle, t=type, s=start, e=end, f=forecast; event: d=date) =====
-const SAMPLE={updated:"2026-09-28",
-vehicles:[{id:"B18",sub:"",kind:"booster",off:1},{id:"B19",sub:"",kind:"booster",off:1},{id:"B20",sub:"",kind:"booster",off:1},
-{id:"B21",sub:"Flight 14",kind:"booster"},{id:"B22",sub:"Post-proof & Raptor integration",kind:"booster"},{id:"B23",sub:"Pre-test outfitting",kind:"booster"},{id:"B24",sub:"Stacking",kind:"booster"},
-{id:"S39",sub:"Sample ship",kind:"ship"},{id:"S40",sub:"Stacking",kind:"ship"}],
-stack:[{v:"B21",k:"first",d:"2026-05-07"},{v:"B21",k:"A3",d:"2026-05-13"},{v:"B21",k:"A4",d:"2026-05-15"},{v:"B21",k:"A5",d:"2026-05-22"},{v:"B21",k:"A6",d:"2026-05-27"},{v:"B21",k:"AX",d:"2026-06-06"},{v:"B21",k:"F2",d:"2026-06-19"},{v:"B21",k:"FX",d:"2026-06-22"},{v:"B21",k:"F3",d:"2026-06-25"},{v:"B22",k:"first",d:"2026-06-29"},{v:"B22",k:"A3",d:"2026-07-01"},{v:"B22",k:"A4",d:"2026-07-03"},{v:"B22",k:"A5",d:"2026-07-09"},{v:"B22",k:"A6",d:"2026-07-23"},{v:"B22",k:"AX",d:"2026-07-30"},{v:"B22",k:"F2",d:"2026-07-31"},{v:"B22",k:"FX",d:"2026-08-03"},{v:"B22",k:"F3",d:"2026-08-06"},{v:"B23",k:"first",d:"2026-08-14"},{v:"B23",k:"A3",d:"2026-08-19"},{v:"B23",k:"A4",d:"2026-08-21"},{v:"B23",k:"A5",d:"2026-08-25"},{v:"B23",k:"A6",d:"2026-08-27"},{v:"B23",k:"AX",d:"2026-09-08"},{v:"B23",k:"F2",d:"2026-09-10"},{v:"B23",k:"FX",d:"2026-09-18"},{v:"B23",k:"F3",d:"2026-09-21"},{v:"B24",k:"first",d:"2026-09-27"},{v:"S39",k:"first",d:"2026-05-20"},{v:"S39",k:"A3",d:"2026-05-25"},{v:"S39",k:"A4",d:"2026-06-01"},{v:"S39",k:"A5",d:"2026-06-09"},{v:"S39",k:"A6",d:"2026-06-17"},{v:"S39",k:"AX",d:"2026-06-29"},{v:"S39",k:"F2",d:"2026-07-11"},{v:"S39",k:"FX",d:"2026-07-17"},{v:"S39",k:"F3",d:"2026-07-24"},{v:"S40",k:"first",d:"2026-08-10"},{v:"S40",k:"A3",d:"2026-08-14"},{v:"S40",k:"A4",d:"2026-08-21"}],
-phases:[{v:"B21",t:"stack",s:"2026-05-07",e:"2026-06-27"},
-{v:"B21",t:"outfit",s:"2026-06-27",e:"2026-07-16"},
-{v:"B21",t:"proof",s:"2026-07-16",e:"2026-07-20"},
-{v:"B21",t:"raptor",s:"2026-07-20",e:"2026-08-24"},
-{v:"B21",t:"lpt",s:"2026-08-24",e:"2026-08-27"},
-{v:"B21",t:"flight",s:"2026-08-27",e:"2026-09-27"},
-{v:"B22",t:"stack",s:"2026-06-29",e:"2026-08-13"},
-{v:"B22",t:"outfit",s:"2026-08-13",e:"2026-09-07"},
-{v:"B22",t:"proof",s:"2026-09-07",e:"2026-09-10"},
-{v:"B22",t:"raptor",s:"2026-09-10"},
-{v:"B23",t:"stack",s:"2026-08-14",e:"2026-09-25"},
-{v:"B23",t:"outfit",s:"2026-09-25"},
-{v:"B24",t:"stack",s:"2026-09-27"},
-{v:"S39",t:"stack",s:"2026-05-20",e:"2026-07-30"},
-{v:"S39",t:"outfit",s:"2026-07-30",e:"2026-09-10"},
-{v:"S39",t:"proof",s:"2026-09-10",e:"2026-09-20"},
-{v:"S39",t:"raptor",s:"2026-09-20"},
-{v:"S40",t:"stack",s:"2026-08-10"}],
-events:[{v:"B21",t:"ring",d:"2026-05-08"},{v:"B21",t:"ring",d:"2026-05-15"},{v:"B21",t:"ring",d:"2026-05-25"},{v:"B21",t:"ring",d:"2026-06-05"},{v:"B21",t:"ring",d:"2026-06-27"},{v:"B21",t:"cryo",d:"2026-07-20"},{v:"B21",t:"static",d:"2026-08-27"},{v:"B21",t:"launch",d:"2026-09-27"},{v:"B22",t:"ring",d:"2026-06-30"},{v:"B22",t:"ring",d:"2026-07-20"},{v:"B22",t:"ring",d:"2026-08-13"},{v:"B22",t:"cryo",d:"2026-09-09"},{v:"B23",t:"ring",d:"2026-08-15"},{v:"B23",t:"ring",d:"2026-09-01"},{v:"B23",t:"ring",d:"2026-09-25"},{v:"B24",t:"ring",d:"2026-09-27"},{v:"S39",t:"cryo",d:"2026-09-18"},{v:"S40",t:"ring",d:"2026-08-12"}]};
 // Settings lock: the PIN is stored only as a salted PBKDF2 hash (not readable in the source). Empty PIN_HASH = no lock. Client-side only, so no replacement for server-side protection.
 const PIN_SALT="519c701d2907e48c2894802b2bc0924c",PIN_ITER=300000,PIN_HASH="81b0d660e3b7bc9339a6f66833ea8b3369fcddf37feaea28347b253c4c97d275";
 async function hashPin(p){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]);const b=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:new TextEncoder().encode(PIN_SALT),iterations:PIN_ITER},k,256);return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
