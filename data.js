@@ -5,13 +5,13 @@ const SAMPLE = {
    "id": "B19",
    "sub": "Flight 12",
    "kind": "booster",
-   "off": 0
+   "off": 1
   },
   {
    "id": "B20",
    "sub": "Flight 13",
    "kind": "booster",
-   "off": 0
+   "off": 1
   },
   {
    "id": "B21",
@@ -41,13 +41,13 @@ const SAMPLE = {
    "id": "S39",
    "sub": "Flight 12",
    "kind": "ship",
-   "off": 0
+   "off": 1
   },
   {
    "id": "S40",
    "sub": "Flight 13",
    "kind": "ship",
-   "off": 0
+   "off": 1
   },
   {
    "id": "S41",
