@@ -71,7 +71,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
  <div id="pace" class="pace" hidden></div>
 </div>
 
-<footer><span>Made by <b>@Basvandenboorn</b></span><span style="text-align:right">Data: <a href="https://starship-spacex.fandom.com/" target="_blank" rel="noopener">Starship SpaceX Wiki</a> · RingWatchers Discord<br>Design inspired by starship-timeline.pages.dev</span></footer>
+<footer><span>Made by <b>@Basvandenboorn</b><br><a href="https://github.com/BasvandenBoorn/Starship-Timeline.github.io" target="_blank" rel="noopener">View on GitHub</a></span><span style="text-align:right">Data: <a href="https://starship-spacex.fandom.com/" target="_blank" rel="noopener">Starship SpaceX Wiki</a> · RingWatchers Discord<br>Design inspired by starship-timeline.pages.dev</span></footer>
 </div>
 <div id="settings" hidden>
 <header><h1>Settings</h1><a href="#" id="back" class="back">← Back to timeline</a></header>
@@ -135,7 +135,7 @@ function derive(){
   if(li<0||E.some(e=>e.v===v.id&&e.t==="launch"))return;
   const last=has(ORDER[li]);let s=last.e?ts(last.e):ts(last.s);
   for(let i=last.e?li+1:li;i<6;i++){const t=ORDER[i],b=bench(v.kind,t),est=t==="stack"?stackEst(v):null,g=est?est.date:s+b.days*D,e=Math.max(g,bd),s0=Math.max(s,bd);
-   if(e>s0)o.phases.push({v:v.id,t,s:dstr(s0),e:dstr(e),f:1,n:(est?"Milestone-matched estimate from "+est.k+" progress on "+est.rid+".":"Fastest comparable interval from "+b.src+".")+" Duration: "+Math.round((e-s0)/D)+" days."});
+   if(e>s0)o.phases.push({v:v.id,t,s:dstr(s0),e:dstr(e),f:1,c:s<=bd?1:0,n:(est?"Milestone-matched estimate from "+est.k+" progress on "+est.rid+".":"Fastest comparable interval from "+b.src+".")+" Duration: "+Math.round((e-s0)/D)+" days."});
    const ek={outfit:"cryo",lpt:"static",flight:"launch"}[t];
    if(ek&&!E.some(x=>x.v===v.id&&x.t===ek))o.events.push({v:v.id,t:ek,d:dstr(e),f:1,n:est?"Predicted from matched "+est.k+" progress on "+est.rid+".":"Predicted from "+b.days+"-day "+PNAME[t]+" benchmark set by "+b.src+"."});
    s=e}
@@ -172,13 +172,15 @@ const TT=document.createElement("div");TT.id="tt";document.body.appendChild(TT);
 function tipOn(el,lines){const mv=e=>{const w=TT.offsetWidth,h=TT.offsetHeight;let x=e.clientX+14,y=e.clientY+16;if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;TT.style.left=Math.max(8,x)+"px";TT.style.top=Math.max(8,y)+"px"};
  el.addEventListener("mouseenter",e=>{TT.innerHTML="";TT.appendChild(mk("b",0,lines[0]));lines.slice(1).filter(Boolean).forEach(t=>TT.appendChild(mk("div",0,t)));TT.style.display="block";mv(e)});
  el.addEventListener("mousemove",mv);el.addEventListener("mouseleave",()=>TT.style.display="none")}
+let VR=null; // visible date range follows zoom + pan
+function updRange(){if(!VR)return;const sc=$("sc"),a=VR.min+sc.scrollLeft/VR.ppd*D,b=Math.min(VR.max,VR.min+(sc.scrollLeft+sc.clientWidth-20)/VR.ppd*D);$("range").textContent=fd(a,fy)+" – "+fd(b,fy)}
 function draw(){TT.style.display="none";
  const vs=S.vehicles.filter(v=>v.kind===kind&&!v.off),ids=vs.map(v=>v.id);
  X=derive();const ph=X.phases.filter(p=>ids.includes(p.v)),ev=X.events.filter(e=>ids.includes(e.v));
  const now=Date.now(),all=[now,ts(S.updated),...ph.flatMap(p=>[ts(p.s),ts(p.e)]),...ev.map(e=>ts(e.d))];
  const min=Math.min(...all)-14*D,max=Math.max(...all)+30*D,days=(max-min)/D;
  const sc=$("sc"),ppd=Math.max(sc.clientWidth-20,300)/days*zoom,W=Math.ceil(days*ppd),H=34+vs.length*RH+6,x=t=>(t-min)/D*ppd;
- $("range").textContent=fd(min,fy)+" – "+fd(max,fy);
+ VR={min,max,ppd};updRange();
  const lab=$("lab");lab.innerHTML="";lab.appendChild(mk("div")).style.height="34px";
  vs.forEach(v=>{const r=mk("div","lr"),sp=mk("span",0,v.sub||"Double-click to add status");if(!v.sub)sp.style.opacity=.4;sp.title="Double-click to edit";sp.style.cursor="text";sp.ondblclick=()=>editSub(v,sp);r.appendChild(mk("b",0,v.id));r.appendChild(sp);lab.appendChild(r)});
  const svg=$("svg");svg.innerHTML="";svg.setAttribute("width",W);svg.setAttribute("height",H);
@@ -191,7 +193,7 @@ function draw(){TT.style.display="none";
  vs.forEach((v,i)=>{const y0=34+i*RH;
   ph.filter(p=>p.v===v.id&&!hid.has(p.t)&&!(p.f&&hid.has("fc"))).forEach(p=>{
    const x1=x(ts(p.s)),w=Math.max(3,x(ts(p.e))-x1),c=PT[p.t][1],g=sv("g",{style:"cursor:pointer"},svg);
-   if(p.f){sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c,opacity:.55},g);sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:"url(#h)",stroke:"#ffffff77","stroke-dasharray":"4 3"},g)}
+   if(p.f){sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c,opacity:.55},g);sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:"url(#h)",...(p.c?{}:{stroke:"#ffffff77","stroke-dasharray":"4 3"})},g)}
    else sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c},g);
    const nm=PT[p.t][2]??""; if(nm&&w>nm.length*6.5+10)sv("text",{x:x1+7,y:y0+48,class:"lb"},g,nm);
    tipOn(g,[v.id+" · "+PT[p.t][0],fd(ts(p.s),fy)+" → "+fd(ts(p.e),fy)+" ("+Math.round((ts(p.e)-ts(p.s))/D)+" days)"+(p.f?" · forecast":""),p.n||""]);g.onclick=()=>info(`${v.id} · ${PT[p.t][0]} · ${fd(ts(p.s),fy)} → ${fd(ts(p.e),fy)}${p.f?" · forecast":""}${p.n?" · "+p.n:""}`)});
@@ -324,6 +326,7 @@ $("gf").onsubmit=async e=>{e.preventDefault();const m=$("gm");let L={n:0,u:0};tr
 function go(p){page=p;try{location.hash=p==="settings"?"settings":""}catch(e){}route()}
 $("upd").onclick=e=>{if(e.detail===3)go("settings")};$("back").onclick=e=>{e.preventDefault();go("view")};
 addEventListener("hashchange",()=>{page=location.hash==="#settings"?"settings":"view";route()});
+$("sc").addEventListener("scroll",updRange,{passive:true});
 addEventListener("resize",draw);refresh();route();
 if(!DATA_OK){const b=document.createElement("div");b.style.cssText="background:#3a1d1d;border:1px solid #7a2e2e;color:#ffd6d6;border-radius:10px;padding:12px 14px;margin-bottom:16px";b.textContent="data.js could not be loaded. Put data.js in the same folder as index.html (exact name, lowercase) and reload.";$("view").prepend(b)}
 </script></body></html>
