@@ -79,7 +79,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
 <div id="setc">
 <div class="card ed"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="un">Undo</button><button id="re">Redo</button><span style="color:var(--mute)">Undo or redo your changes (until you reload the page).</span></div></div>
 <div class="card ed">
- <h2>Enter milestones</h2><p>Everything is stored in your browser. Export a JSON backup. Forecasts use the same method as starship-timeline.pages.dev: a fastest-benchmark duration per phase, with stacking matched against a reference vehicle (edit BENCH / STACK_REF at the top of the script). Entering the same vehicle + phase/milestone/event again replaces the old entry. Leave End empty for a phase that is still in progress.</p>
+ <h2>Enter milestones</h2><p>Everything is stored in your browser. Export a JSON backup. Forecasts use the same method as starship-timeline.pages.dev: a fastest-benchmark duration per phase, with stacking matched against a reference vehicle (edit BENCH / STACK_REF at the top of the script). You can enter the same vehicle + phase/milestone/event multiple times; existing entries are kept. Leave End empty for a phase that is still in progress.</p>
  <form id="fv"><label>Vehicle ID<input id="vi" placeholder="B25 or S42" required></label><label>Description<input id="vs" placeholder="Stacking"></label>
   <label>Type<select id="vk"><option value="booster">Booster</option><option value="ship">Ship</option></select></label><button>Add vehicle</button></form>
  <form id="fp"><label>Vehicle<select class="vsel" id="pv"></select></label><label>Phase<select id="pt"></select></label>
@@ -281,10 +281,10 @@ $("fv").onsubmit=e=>{e.preventDefault();const id=$("vi").value.trim(),ed=editing
  if(ed){const old=ed.id;[S.phases,S.events,S.stack].forEach(a=>a.forEach(x=>{if(x.v===old)x.v=id}));ed.id=id;ed.sub=$("vs").value.trim();ed.kind=$("vk").value}
  else S.vehicles.push({id,sub:$("vs").value.trim(),kind:$("vk").value});
  $("vi").value=$("vs").value="";endEdit();change()};
-$("fp").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="p"?editing.o:null;S.phases=S.phases.filter(p=>p!==ed&&!(p.v===$("pv").value&&p.t===$("pt").value));S.phases.push({v:$("pv").value,t:$("pt").value,s:$("ps").value,e:$("pe").value});endEdit();change()};
+$("fp").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="p"?editing.o:null;S.phases=S.phases.filter(p=>p!==ed);S.phases.push({v:$("pv").value,t:$("pt").value,s:$("ps").value,e:$("pe").value});endEdit();change()};
 $("tf").onchange=()=>{tf=$("tf").value;editor()};$("sv").onchange=fillSk;$("ev").onchange=fillEt;
-$("fs").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="s"?editing.o:null;S.stack=S.stack.filter(m=>m!==ed&&!(m.v===$("sv").value&&m.k===$("sk").value));S.stack.push({v:$("sv").value,k:$("sk").value,d:$("sd").value});endEdit();change()};
-$("fe").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="e"?editing.o:null;S.events=ed?S.events.filter(x=>x!==ed):S.events.filter(x=>!(x.v===$("ev").value&&x.t===$("et").value&&(x.t!=="ring"||x.d===$("ed").value)));S.events.push({v:$("ev").value,t:$("et").value,d:$("ed").value,n:$("en").value.trim()});$("en").value="";endEdit();change()};
+$("fs").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="s"?editing.o:null;S.stack=S.stack.filter(m=>m!==ed);S.stack.push({v:$("sv").value,k:$("sk").value,d:$("sd").value});endEdit();change()};
+$("fe").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="e"?editing.o:null;S.events=ed?S.events.filter(x=>x!==ed):S.events;S.events.push({v:$("ev").value,t:$("et").value,d:$("ed").value,n:$("en").value.trim()});$("en").value="";endEdit();change()};
 $("ex").onclick=()=>{$("io").hidden=false;$("io").value=JSON.stringify(S,null,1);$("io").select()};
 $("im").onclick=()=>{const io=$("io");if(io.hidden||!io.value.trim()){io.hidden=false;io.value="";io.placeholder="Paste JSON and click Import again";return}
  try{const d=JSON.parse(io.value);if(d.vehicles&&d.phases&&d.events){snap();S=clean(d);S.updated=S.updated||iso();io.hidden=true;refresh()}}catch(x){io.value="Invalid JSON"}};
