@@ -74,12 +74,6 @@ const SAMPLE = {
    "id": "S45",
    "sub": "Flight 18",
    "kind": "ship"
-  },
-  {
-   "id": "S46",
-   "sub": "",
-   "kind": "ship",
-   "off": 0
   }
  ],
  "phases": [
