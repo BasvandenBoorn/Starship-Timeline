@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Starship Production Timeline</title>
+<meta name="description" content="Interactive production timeline for Starship boosters and ships.">
+<meta name="theme-color" content="#0c0f14">
+<meta property="og:title" content="Starship Production Timeline">
+<meta property="og:description" content="Interactive production timeline for Starship boosters and ships.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0c0f14;--panel:#10141b;--line:#232a35;--ink:#f3ede4;--mute:#9098a5;--acc:#ff5a36;--chip:#1a2029;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;color:var(--ink);font:13px/1.45 Inter,system-ui,sans-serif;background:radial-gradient(900px 400px at 100% 0,#2a1512 0,transparent 70%),var(--bg)}
+main{max-width:1420px;margin:0 auto;padding:22px 18px 40px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+h1{margin:0;font-weight:700;font-size:clamp(28px,5vw,54px);letter-spacing:-.045em;line-height:1}
+.upd{color:var(--mute);font-size:13px}.upd:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--acc);margin-right:8px;box-shadow:0 0 0 3px #ff5a3630}
+.card{border:1px solid var(--line);border-radius:18px;background:#10141bcc;overflow:hidden;margin-bottom:18px}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;padding:4px;gap:2px;background:#0d1117}
+button,select,input{font:inherit;color:var(--ink);background:var(--chip);border:1px solid var(--line);border-radius:8px;padding:7px 10px}
+button{cursor:pointer}button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.seg button{border:0;background:none;font-weight:600;color:var(--mute)}.seg button.on{background:var(--chip);color:#fff}
+.veh{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--line);align-items:flex-end}
+.veh small{display:block;font-weight:600;margin-bottom:12px}
+.chip{border:0;border-radius:99px;padding:8px 16px;font-weight:700;margin:0 6px 4px 0}.chip.on{background:var(--acc);color:#fff}
+.zoom{display:flex;gap:8px}.zoom .seg button{padding:8px 14px;color:#fff}
+.meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 20px 4px;color:var(--mute);font-size:12px}
+.chart{display:flex;padding-bottom:8px}.lab{flex:0 0 172px;padding-left:20px}
+.lr{height:84px;padding-top:28px;border-top:1px solid var(--line)}.lr b{display:block;font-size:14px}.lr span{font-size:11px;color:var(--mute)}
+#sc{flex:1;overflow-x:auto;cursor:grab;padding-right:20px}#sc svg{display:block}
+svg text{fill:var(--mute);font:10px Inter,sans-serif}svg .lb{fill:#fff;font-size:11px}
+#info{padding:10px 20px;min-height:40px;font-size:13px;border-top:1px solid var(--line)}
+.leg{border-top:1px solid var(--line);padding:16px 20px}.leg p{margin:0 0 12px;color:var(--mute)}.leg p b{color:var(--ink)}
+.lg{display:flex;flex-wrap:wrap;gap:8px 8px}.lg button{border:0;background:none;color:#cfd4dc;display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:6px}
+.lg button.off{opacity:.35}.lg i{width:14px;height:14px;border-radius:3px;display:inline-block}
+.pace{padding:18px 20px}.pr{display:grid;grid-template-columns:70px 1fr 70px;gap:12px;align-items:center;margin:8px 0}
+.pr div.b{height:22px;border-radius:4px;background:#2f6650}.pr .f{background:repeating-linear-gradient(45deg,#2f665088 0 4px,#2f665044 4px 8px);border:1px dashed #ffffff66}
+.ed{padding:18px 20px}.ed h2{font-size:15px;margin:0 0 4px}.ed p{color:var(--mute);margin:0 0 14px}
+form{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;align-items:end;margin-bottom:14px}
+label{display:flex;flex-direction:column;gap:3px;font-size:11px;color:var(--mute)}label.ck{flex-direction:row;align-items:center;gap:6px;padding-bottom:9px}
+form>button{background:var(--acc);border-color:var(--acc);font-weight:600}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mute);font-weight:500}
+footer{display:flex;justify-content:space-between;color:var(--mute);font-size:12px;padding:0 4px;gap:10px;flex-wrap:wrap}
+@media(max-width:640px){.lab{flex-basis:96px;padding-left:12px}}
+a{color:var(--acc)}.back{display:inline-block;margin-bottom:6px}.lr input{width:100%}footer b,footer a{color:var(--ink);font-weight:600;text-decoration:none}footer a:hover{text-decoration:underline}footer{line-height:1.7}</style></head><body><main>
+<div id="view">
+<header><h1 id="h1">Starship Booster Production Timeline</h1><div class="upd" id="upd"></div></header>
+
+<div class="card">
+ <div class="bar"><div class="seg" id="tabs"><button data-k="booster" class="on">Booster</button><button data-k="ship">Starship</button></div><span id="pnote" hidden style="color:var(--mute)">Normalized from each vehicle's first observed section</span><div class="seg" id="views"><button data-t="tl" class="on">Timeline</button><button data-t="pace">Stacking pace</button></div></div>
+ <div class="veh"><div><small>Vehicles</small><div id="chips"></div></div>
+  <div style="display:flex;gap:8px"><button id="shot" title="Save screenshot" aria-label="Save screenshot">Screenshot</button><div class="zoom"><div class="seg"><button id="zm">−</button><button id="zr">Reset</button><button id="zp">+</button></div></div></div></div>
+ <div id="tl">
+  <div class="meta"><span id="range"></span><span>Click for details · click legend to filter · drag to pan · scroll, pinch, or +/− to zoom</span></div>
+  <div class="chart"><div class="lab" id="lab"></div><div id="sc"><svg id="svg"></svg></div></div>
+  <div id="info">Click a bar or icon for details.</div>
+  <div class="leg"><p><b>Display filters</b> &nbsp;Click to toggle · Shift-click to isolate</p><div class="lg" id="lg"></div></div>
+ </div>
+ <div id="pace" class="pace" hidden></div>
+</div>
+
+<footer><span>Made by <b>@Basvandenboorn</b></span><span style="text-align:right">Data: <a href="https://starship-spacex.fandom.com/" target="_blank" rel="noopener">Starship SpaceX Wiki</a> · RingWatchers Discord<br>Design inspired by starship-timeline.pages.dev</span></footer>
+</div>
+<div id="settings" hidden>
+<header><h1>Settings</h1><a href="#" id="back" class="back">← Back to timeline</a></header>
+<div id="gate" class="card ed" hidden><h2>Settings are locked</h2><p>Enter the PIN to continue.</p><form id="gf" style="display:flex;gap:8px;grid-template-columns:none"><input id="gp" type="password" placeholder="PIN" autocomplete="off"><button>Unlock</button></form><p id="gm"></p></div>
+<div id="setc">
+<div class="card ed"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="un">Undo</button><button id="re">Redo</button><span style="color:var(--mute)">Undo or redo your changes (until you reload the page).</span></div></div>
+<div class="card ed">
+ <h2>Enter milestones</h2><p>Everything is stored in your browser. Export a JSON backup. Forecasts are calculated automatically from earlier timelines (weighted average: recent vehicles count more, outliers count less). Entering the same vehicle + phase/milestone/event again replaces the old entry. Leave End empty for a phase that is still in progress.</p>
+ <form id="fv"><label>Vehicle ID<input id="vi" placeholder="B25 or S42" required></label><label>Description<input id="vs" placeholder="Stacking"></label>
+  <label>Type<select id="vk"><option value="booster">Booster</option><option value="ship">Ship</option></select></label><button>Add vehicle</button></form>
+ <form id="fp"><label>Vehicle<select class="vsel" id="pv"></select></label><label>Phase<select id="pt"></select></label>
+  <label>Start<input type="date" id="ps" required></label><label>End (empty = ongoing)<input type="date" id="pe"></label>
+  <button>Add phase</button></form>
+ <form id="fs"><label>Vehicle<select class="vsel" id="sv"></select></label><label>Stacking milestone<select id="sk"></select></label><label>Date<input type="date" id="sd" required></label><button>Add stacking milestone</button></form>
+ <form id="fe"><label>Vehicle<select class="vsel" id="ev"></select></label><label>Event<select id="et"></select></label>
+  <label>Date<input type="date" id="ed" required></label><label>Note<input id="en" placeholder="optional"></label>
+  <button>Add event</button></form>
+ <div class="tw"><table><thead><tr><th>Vehicle</th><th>Type</th><th>When</th><th>Note</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+  <button id="ex">Export JSON</button><button id="im">Import JSON</button><button id="rs">Reset to sample data</button></div>
+ <textarea id="io" hidden rows="6" style="width:100%;margin-top:10px;background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:8px"></textarea>
+</div>
+
+</div></div></main>
+<script>
+const PT={stack:["Stacking","#2f6650","Stack"],outfit:["Outfitting / wait","#6e5626","Outfit"],raptor:["Raptor integration","#84591a","Raptors"],proof:["Proof / cryo","#2f5568"],lpt:["Launch-pad tests","#6a4a3a"],flight:["Flight integration","#57467e","Flight prep"]};
+const ET={ring:["Stack progress","#ffffff"],cryo:["Cryo","#2b8fc0"],static:["Static fire","#d9702a"],launch:["Launch","#7c5fcf"],issue:["Issue","#d9473f"]};
+// Stacking milestones for the pace chart: [key, name, sublabel]. Edit freely.
+const STACKM=[["first","First section",""],["A3","A3","M:11"],["A4","A4","M:15"],["A5","A5","M:19"],["A6","A6","M:23"],["AX","AX","A:25"],["F2","F2",""],["FX","FX","F:7"],["F3","F3","F:11"],["complete","Complete",""]];
+const VC=["#63b58a","#d9748f","#4db5cf","#f3f3f3","#e8a04a","#a58bf0"];let phid=new Set();
+const ORDER=["stack","outfit","proof","raptor","lpt","flight"],DEFDUR={stack:50,outfit:20,proof:4,raptor:30,lpt:3,flight:20}; // fallback durations (days) when no earlier vehicle has finished a phase
+const dstr=t=>new Date(t+432e5).toLocaleDateString("sv-SE");let X={phases:[],events:[],stack:[]};
+// Forecasts: weighted average of earlier vehicles of the same kind (recent ones count more, outliers count less). phase durations / stacking offsets of earlier vehicles of the same kind.
+const wavg=a=>{ // robust + recency-weighted mean of [{x,t}]: outliers count less, newer values count more
+ if(!a.length)return null;a=[...a].sort((p,q)=>p.t-q.t);const n=a.length;if(n===1)return a[0].x;
+ const md=l=>{const s=[...l].sort((p,q)=>p-q),m=(s.length-1)/2;return(s[Math.floor(m)]+s[Math.ceil(m)])/2};
+ const med=md(a.map(q=>q.x)),sc=Math.max(1.4826*md(a.map(q=>Math.abs(q.x-med))),.15*Math.abs(med),1);let sw=0,sx=0;
+ a.forEach((q,i)=>{const w=Math.pow(2,1.5*i/(n-1))/(1+Math.pow((q.x-med)/(2*sc),2));sw+=w;sx+=w*q.x});return sx/sw};
+function derive(){
+ const td=ts(iso()),bd=ts(S.updated),P=S.phases,E=S.events,K=S.stack,kd=id=>(S.vehicles.find(v=>v.id===id)||{}).kind,done=P.filter(p=>p.e);
+ const mean=a=>a.reduce((x,y)=>x+y,0)/a.length;
+ const avg=(k,t)=>{const r=wavg(done.filter(p=>p.t===t&&kd(p.v)===k).map(p=>({x:(ts(p.e)-ts(p.s))/D,t:ts(p.e)})));return Math.round(r==null?DEFDUR[t]:r)};
+ const t0of=id=>{const f=K.find(m=>m.v===id&&m.k==="first");if(f)return ts(f.d);const s=P.filter(p=>p.v===id&&p.t==="stack");return s.length?Math.min(...s.map(p=>ts(p.s))):null};
+ const offs=(k,kk)=>{const d=K.filter(m=>m.k===k&&kd(m.v)===kk&&t0of(m.v)!=null).map(m=>({x:(ts(m.d)-t0of(m.v))/D,t:ts(m.d)}));return wavg(d)};
+ const o={phases:[],events:[...E],stack:[...K]};
+ S.vehicles.forEach(v=>{
+  const mine=P.filter(p=>p.v===v.id),has=t=>mine.find(p=>p.t===t);let li=-1;ORDER.forEach((t,i)=>{if(has(t))li=i});
+  mine.forEach(p=>o.phases.push(p.e?p:{...p,e:dstr(Math.max(ts(p.s),bd))}));
+  if(li<0||E.some(e=>e.v===v.id&&e.t==="launch"))return;
+  const ends={};let cur,first=true;mine.forEach(p=>{if(p.e)ends[p.t]=ts(p.e)});
+  const put=(t,s)=>{let e=s+avg(v.kind,t)*D;if(first&&e<=td)e=td+D;first=false;o.phases.push({v:v.id,t,s:dstr(s),e:dstr(e),f:1});return e};
+  const last=has(ORDER[li]);
+  if(last.e)cur=ts(last.e);else{let e=ts(last.s)+avg(v.kind,ORDER[li])*D;if(e<=td)e=td+D;first=false;o.phases.push({v:v.id,t:ORDER[li],s:dstr(Math.max(ts(last.s),bd)),e:dstr(e),f:1});ends[ORDER[li]]=e;cur=e}
+  for(let i=li+1;i<6;i++){cur=put(ORDER[i],cur);ends[ORDER[i]]=cur}
+  [["proof","cryo"],["lpt","static"],["flight","launch"]].forEach(([t,k])=>{if(ends[t]!=null&&ends[t]>=bd&&!E.some(e=>e.v===v.id&&e.t===k))o.events.push({v:v.id,t:k,d:dstr(ends[t]),n:"",f:1})});
+  const t0=t0of(v.id);if(t0!=null){const st=K.filter(m=>m.v===v.id),ks=STACKM.map(m=>m[0]).filter(k=>k!=="first"&&k!=="complete");let la=-1;ks.forEach((k,i)=>{if(st.some(m=>m.k===k))la=i});
+   let prev=Math.max(t0,...st.filter(m=>m.k!=="first").map(m=>ts(m.d)));
+   ks.slice(la+1).forEach(k=>{const q=offs(k,v.kind);if(q==null)return;prev=Math.max(t0+Math.round(q)*D,prev,bd);o.stack.push({v:v.id,k,d:dstr(prev),f:1})})}});
+ return o}
+
+// ===== HOSTING: replace SAMPLE below with your exported JSON and re-upload this file.
+// Still seeing old data after uploading? Your browser remembers your input: bump KEY (e.g. "ss-timeline-v3") or click "Reset to sample data".
+// ===== SAMPLE DATA (phase: v=vehicle, t=type, s=start, e=end, f=forecast; event: d=date) =====
+const SAMPLE={updated:"2026-09-28",
+vehicles:[{id:"B18",sub:"",kind:"booster",off:1},{id:"B19",sub:"",kind:"booster",off:1},{id:"B20",sub:"",kind:"booster",off:1},
+{id:"B21",sub:"Flight 14",kind:"booster"},{id:"B22",sub:"Post-proof & Raptor integration",kind:"booster"},{id:"B23",sub:"Pre-test outfitting",kind:"booster"},{id:"B24",sub:"Stacking",kind:"booster"},
+{id:"S39",sub:"Sample ship",kind:"ship"},{id:"S40",sub:"Stacking",kind:"ship"}],
+stack:[{v:"B21",k:"first",d:"2026-05-07"},{v:"B21",k:"A3",d:"2026-05-13"},{v:"B21",k:"A4",d:"2026-05-15"},{v:"B21",k:"A5",d:"2026-05-22"},{v:"B21",k:"A6",d:"2026-05-27"},{v:"B21",k:"AX",d:"2026-06-06"},{v:"B21",k:"F2",d:"2026-06-19"},{v:"B21",k:"FX",d:"2026-06-22"},{v:"B21",k:"F3",d:"2026-06-25"},{v:"B22",k:"first",d:"2026-06-29"},{v:"B22",k:"A3",d:"2026-07-01"},{v:"B22",k:"A4",d:"2026-07-03"},{v:"B22",k:"A5",d:"2026-07-09"},{v:"B22",k:"A6",d:"2026-07-23"},{v:"B22",k:"AX",d:"2026-07-30"},{v:"B22",k:"F2",d:"2026-07-31"},{v:"B22",k:"FX",d:"2026-08-03"},{v:"B22",k:"F3",d:"2026-08-06"},{v:"B23",k:"first",d:"2026-08-14"},{v:"B23",k:"A3",d:"2026-08-19"},{v:"B23",k:"A4",d:"2026-08-21"},{v:"B23",k:"A5",d:"2026-08-25"},{v:"B23",k:"A6",d:"2026-08-27"},{v:"B23",k:"AX",d:"2026-09-08"},{v:"B23",k:"F2",d:"2026-09-10"},{v:"B23",k:"FX",d:"2026-09-18"},{v:"B23",k:"F3",d:"2026-09-21"},{v:"B24",k:"first",d:"2026-09-27"},{v:"S39",k:"first",d:"2026-05-20"},{v:"S39",k:"A3",d:"2026-05-25"},{v:"S39",k:"A4",d:"2026-06-01"},{v:"S39",k:"A5",d:"2026-06-09"},{v:"S39",k:"A6",d:"2026-06-17"},{v:"S39",k:"AX",d:"2026-06-29"},{v:"S39",k:"F2",d:"2026-07-11"},{v:"S39",k:"FX",d:"2026-07-17"},{v:"S39",k:"F3",d:"2026-07-24"},{v:"S40",k:"first",d:"2026-08-10"},{v:"S40",k:"A3",d:"2026-08-14"},{v:"S40",k:"A4",d:"2026-08-21"}],
+phases:[{v:"B21",t:"stack",s:"2026-05-07",e:"2026-06-27"},
+{v:"B21",t:"outfit",s:"2026-06-27",e:"2026-07-16"},
+{v:"B21",t:"proof",s:"2026-07-16",e:"2026-07-20"},
+{v:"B21",t:"raptor",s:"2026-07-20",e:"2026-08-24"},
+{v:"B21",t:"lpt",s:"2026-08-24",e:"2026-08-27"},
+{v:"B21",t:"flight",s:"2026-08-27",e:"2026-09-27"},
+{v:"B22",t:"stack",s:"2026-06-29",e:"2026-08-13"},
+{v:"B22",t:"outfit",s:"2026-08-13",e:"2026-09-07"},
+{v:"B22",t:"proof",s:"2026-09-07",e:"2026-09-10"},
+{v:"B22",t:"raptor",s:"2026-09-10"},
+{v:"B23",t:"stack",s:"2026-08-14",e:"2026-09-25"},
+{v:"B23",t:"outfit",s:"2026-09-25"},
+{v:"B24",t:"stack",s:"2026-09-27"},
+{v:"S39",t:"stack",s:"2026-05-20",e:"2026-07-30"},
+{v:"S39",t:"outfit",s:"2026-07-30",e:"2026-09-10"},
+{v:"S39",t:"proof",s:"2026-09-10",e:"2026-09-20"},
+{v:"S39",t:"raptor",s:"2026-09-20"},
+{v:"S40",t:"stack",s:"2026-08-10"}],
+events:[{v:"B21",t:"ring",d:"2026-05-08"},{v:"B21",t:"ring",d:"2026-05-15"},{v:"B21",t:"ring",d:"2026-05-25"},{v:"B21",t:"ring",d:"2026-06-05"},{v:"B21",t:"ring",d:"2026-06-27"},{v:"B21",t:"cryo",d:"2026-07-20"},{v:"B21",t:"static",d:"2026-08-27"},{v:"B21",t:"launch",d:"2026-09-27"},{v:"B22",t:"ring",d:"2026-06-30"},{v:"B22",t:"ring",d:"2026-07-20"},{v:"B22",t:"ring",d:"2026-08-13"},{v:"B22",t:"cryo",d:"2026-09-09"},{v:"B23",t:"ring",d:"2026-08-15"},{v:"B23",t:"ring",d:"2026-09-01"},{v:"B23",t:"ring",d:"2026-09-25"},{v:"B24",t:"ring",d:"2026-09-27"},{v:"S39",t:"cryo",d:"2026-09-18"},{v:"S40",t:"ring",d:"2026-08-12"}]};
+// Settings lock: the PIN is stored only as a salted PBKDF2 hash (not readable in the source). Empty PIN_HASH = no lock. Client-side only, so no replacement for server-side protection.
+const PIN_SALT="519c701d2907e48c2894802b2bc0924c",PIN_ITER=300000,PIN_HASH="81b0d660e3b7bc9339a6f66833ea8b3369fcddf37feaea28347b253c4c97d275";
+async function hashPin(p){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]);const b=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:new TextEncoder().encode(PIN_SALT),iterations:PIN_ITER},k,256);return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const KEY="ss-timeline-v2",D=864e5,RH=84,NS="http://www.w3.org/2000/svg";
+const $=i=>document.getElementById(i),ts=s=>+new Date(s+"T00:00:00");
+const fd=(t,o)=>new Date(t).toLocaleDateString("en-GB",o||{day:"numeric",month:"short"}),fy={day:"numeric",month:"short",year:"numeric"};
+function clean(d){d.stack=(d.stack||[]).filter(m=>!m.f);d.phases=d.phases.filter(p=>!p.f);d.events=d.events.filter(e=>!e.f);return d}
+function load(){let d;try{const r=localStorage.getItem(KEY);if(r)d=JSON.parse(r)}catch(e){}if(!d)d=JSON.parse(JSON.stringify(SAMPLE));return clean(d)}
+const iso=()=>new Date().toLocaleDateString("sv-SE");
+function change(){S.updated=iso();snap();refresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load(),zoom=1,hid=new Set(),kind="booster";
+let hist=[],redo=[],last="";try{localStorage.removeItem(KEY+"-bk")}catch(e){}
+function snap(){hist.push({t:Date.now(),s:last});if(hist.length>30)hist.shift();redo=[]}
+function undo(){if(!hist.length)return;redo.push(last);S=JSON.parse(hist.pop().s);refresh()}
+function redoF(){if(!redo.length)return;hist.push({t:Date.now(),s:last});S=JSON.parse(redo.pop());refresh()}
+function histUI(){$("un").disabled=!hist.length;$("re").disabled=!redo.length}
+const mk=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const sv=(n,a,p,t)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;p.appendChild(e);return e};
+const info=t=>$("info").textContent=t;
+
+function draw(){
+ const vs=S.vehicles.filter(v=>v.kind===kind&&!v.off),ids=vs.map(v=>v.id);
+ X=derive();const ph=X.phases.filter(p=>ids.includes(p.v)),ev=X.events.filter(e=>ids.includes(e.v));
+ const now=Date.now(),all=[now,ts(S.updated),...ph.flatMap(p=>[ts(p.s),ts(p.e)]),...ev.map(e=>ts(e.d))];
+ const min=Math.min(...all)-14*D,max=Math.max(...all)+30*D,days=(max-min)/D;
+ const sc=$("sc"),ppd=Math.max(sc.clientWidth-20,300)/days*zoom,W=Math.ceil(days*ppd),H=34+vs.length*RH+6,x=t=>(t-min)/D*ppd;
+ $("range").textContent=fd(min,fy)+" – "+fd(max,fy);
+ const lab=$("lab");lab.innerHTML="";lab.appendChild(mk("div")).style.height="34px";
+ vs.forEach(v=>{const r=mk("div","lr"),sp=mk("span",0,v.sub||"Double-click to add status");if(!v.sub)sp.style.opacity=.4;sp.title="Double-click to edit";sp.style.cursor="text";sp.ondblclick=()=>editSub(v,sp);r.appendChild(mk("b",0,v.id));r.appendChild(sp);lab.appendChild(r)});
+ const svg=$("svg");svg.innerHTML="";svg.setAttribute("width",W);svg.setAttribute("height",H);
+ const df=sv("defs",{},svg),pt=sv("pattern",{id:"h",width:6,height:6,patternUnits:"userSpaceOnUse",patternTransform:"rotate(45)"},df);
+ sv("line",{x1:0,y1:0,x2:0,y2:6,stroke:"#ffffff55","stroke-width":2},pt);
+ for(let d=new Date(min);;d=new Date(d.getFullYear(),d.getMonth()+1,1)){ if(d.getDate()!==1)continue; if(+d>max)break;
+  const px=x(+d);sv("line",{x1:px,x2:px,y1:22,y2:H,stroke:"#ffffff14"},svg);
+  sv("text",{x:px+6,y:16},svg,d.toLocaleDateString("en-GB",{month:"short"})+(d.getMonth()===0?" "+String(d.getFullYear()).slice(2):"")); if(+d+32*D>max+40*D)break}
+ for(let i=1;i<=vs.length;i++)sv("line",{x1:0,x2:W,y1:34+(i-1)*RH,y2:34+(i-1)*RH,stroke:"#232a35"},svg);
+ vs.forEach((v,i)=>{const y0=34+i*RH;
+  ph.filter(p=>p.v===v.id&&!hid.has(p.t)&&!(p.f&&hid.has("fc"))).forEach(p=>{
+   const x1=x(ts(p.s)),w=Math.max(3,x(ts(p.e))-x1),c=PT[p.t][1],g=sv("g",{style:"cursor:pointer"},svg);
+   if(p.f){sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c,opacity:.55},g);sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:"url(#h)",stroke:"#ffffff77","stroke-dasharray":"4 3"},g)}
+   else sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c},g);
+   const nm=PT[p.t][2]??""; if(nm&&w>nm.length*6.5+10)sv("text",{x:x1+7,y:y0+48,class:"lb"},g,nm);
+   g.onclick=()=>info(`${v.id} · ${PT[p.t][0]} · ${fd(ts(p.s),fy)} → ${fd(ts(p.e),fy)}${p.f?" · forecast":""}`)});
+  ev.filter(e=>e.v===v.id&&!hid.has(e.t)&&!(e.f&&hid.has("fc"))).forEach(e=>{
+   const cx=x(ts(e.d)),ring=e.t==="ring",cy=y0+(ring?18:70),c=ET[e.t][1];
+   const n=ring?sv("circle",{cx,cy,r:5,fill:"none",stroke:"#fff","stroke-width":1.6},svg)
+    :e.f?sv("rect",{x:cx-7,y:cy-7,width:14,height:14,transform:`rotate(45 ${cx} ${cy})`,rx:2,fill:"#10141b",stroke:c,"stroke-width":2,"stroke-dasharray":"3 2"},svg)
+    :sv("circle",{cx,cy,r:8,fill:c,stroke:"#10141b","stroke-width":2},svg);
+   n.style.cursor="pointer";n.onclick=()=>info(`${v.id} · ${ET[e.t][0]} · ${fd(ts(e.d),fy)}${e.f?" · forecast":""}${e.n?" · "+e.n:""}`)})});
+ const tx=x(now);sv("line",{x1:tx,x2:tx,y1:22,y2:H,stroke:"#ff5a36","stroke-width":2},svg);sv("text",{x:tx+6,y:44,style:"fill:#ff5a36;font-weight:600"},svg,"Today "+fd(now));
+ const ux=x(ts(S.updated));sv("line",{x1:ux,x2:ux,y1:22,y2:H,stroke:"#fff","stroke-dasharray":"3 3","stroke-opacity":.7},svg);sv("text",{x:ux-6,y:44,"text-anchor":"end"},svg,"Updated "+fd(ts(S.updated)));
+ if(!vs.length)info(S.vehicles.some(v=>v.kind===kind)?"Select at least one vehicle.":"No vehicles in this tab yet. Add one below.");
+ pace();
+}
+function pace(){
+ const p=$("pace");p.innerHTML="";
+ const vs=S.vehicles.filter(v=>v.kind===kind&&!v.off),sk=new Set(STACKM.map(m=>m[0]));
+ const cats=[...STACKM.map(m=>({k:m[0],n:m[1],s:m[2]})),...["cryo","static","launch"].filter(k=>!phid.has(k)).map(k=>({k,n:ET[k][0],s:""}))];
+ const pts=vs.map((v,vi)=>{const st=X.stack.filter(m=>m.v===v.id),sp=X.phases.filter(q=>q.v===v.id&&q.t==="stack"),get=k=>st.find(m=>m.k===k);
+  const f0=get("first"),t0=f0?ts(f0.d):sp.length?Math.min(...sp.map(q=>ts(q.s))):null,a=[];
+  if(t0!=null)cats.forEach((c,i)=>{let d,f=0;
+   if(sk.has(c.k)){const m=get(c.k);if(m){d=ts(m.d);f=m.f}else if(c.k==="first")d=t0;else if(c.k==="complete"&&sp.length){const q=sp.reduce((x,y)=>ts(y.e)>ts(x.e)?y:x);d=ts(q.e);f=q.f}}
+   else{const e=X.events.find(e=>e.v===v.id&&e.t===c.k);if(e){d=ts(e.d);f=e.f}}
+   if(d!=null)a.push({i,c,d,f:f?1:0,n:Math.round((d-t0)/D)})});
+  return{v,c:VC[vi%VC.length],a}});
+ const top=mk("div");top.style.cssText="display:flex;justify-content:space-between;color:var(--mute);gap:10px;flex-wrap:wrap";
+ top.append(mk("span",0,"Days since first observed section"),mk("span",0,"Tap a point for its date and source milestone"));p.appendChild(top);
+ const lg=mk("div");lg.style.cssText="display:flex;gap:22px;flex-wrap:wrap;margin:16px 0 4px 20px";
+ pts.forEach(o=>{const t=mk("span",0,o.v.id);t.style.cssText=`color:${o.c};font-weight:600;display:inline-flex;align-items:center;gap:8px`;const i=mk("i");i.style.cssText=`width:26px;height:2px;background:${o.c}`;t.prepend(i);lg.appendChild(t)});p.appendChild(lg);
+ const maxY=Math.max(25,Math.ceil(Math.max(0,...pts.flatMap(o=>o.a.map(q=>q.n)))/25)*25),W=1200,H=400,L=56,R=24,T=16,B=54;
+ const x=i=>L+i/(cats.length-1)*(W-L-R),y=n=>T+(1-n/maxY)*(H-T-B);
+ const svg=sv("svg",{viewBox:`0 0 ${W} ${H}`,width:"100%"},p);
+ for(let g=0;g<=maxY;g+=25){sv("line",{x1:L,x2:W-R,y1:y(g),y2:y(g),stroke:"#ffffff14"},svg);sv("text",{x:L-8,y:y(g)+3,"text-anchor":"end"},svg,g)}
+ sv("text",{transform:`translate(14 ${(T+H-B)/2}) rotate(-90)`,"text-anchor":"middle",style:"font-weight:600"},svg,"Days since first observed section");
+ cats.forEach((c,i)=>{sv("line",{x1:x(i),x2:x(i),y1:T,y2:H-B,stroke:"#ffffff0d","stroke-dasharray":"2 4"},svg);
+  sv("text",{x:x(i),y:H-B+18,"text-anchor":"middle",style:"font-weight:600"},svg,c.n);if(c.s)sv("text",{x:x(i),y:H-B+30,"text-anchor":"middle"},svg,c.s)});
+ pts.forEach(o=>{o.a.forEach((q,j)=>{if(j){const r=o.a[j-1];sv("line",{x1:x(r.i),y1:y(r.n),x2:x(q.i),y2:y(q.n),stroke:o.c,"stroke-width":2,"stroke-dasharray":q.f?"5 4":"none"},svg)}});
+  o.a.forEach(q=>{const cx=x(q.i),cy=y(q.n),m=q.f?sv("rect",{x:cx-5,y:cy-5,width:10,height:10,transform:`rotate(45 ${cx} ${cy})`,fill:"#10141b",stroke:o.c,"stroke-width":2,"stroke-dasharray":"2 2"},svg):sv("circle",{cx,cy,r:5,fill:"#10141b",stroke:o.c,"stroke-width":2},svg);
+   m.style.cursor="pointer";m.onclick=()=>$("pinfo").textContent=`${o.v.id} · ${q.c.n}${q.c.s?" ("+q.c.s+")":""} · ${fd(q.d,fy)} · ${q.n} days after first section${q.f?" · forecast":""}`})});
+ const pi=mk("div",0,vs.length?"Click a point for details.":"No vehicles selected in this tab.");pi.id="pinfo";pi.style.cssText="min-height:24px;margin:8px 0 0 20px";p.appendChild(pi);
+ const ov=mk("div","lg");ov.style.cssText="border-top:1px solid var(--line);margin:18px -20px -18px;padding:16px 20px;align-items:center";
+ const h=mk("span",0,"Stacking overlays");h.style.cssText="font-weight:700;margin-right:8px";ov.appendChild(h);
+ ["cryo","static","launch"].forEach(k=>{const b=mk("button",phid.has(k)?"off":"");const i=mk("i");i.style.cssText=`background:${ET[k][1]};border-radius:50%`;b.append(i,ET[k][0]);b.onclick=()=>{phid.has(k)?phid.delete(k):phid.add(k);pace()};ov.appendChild(b)});
+ const pr=mk("span",0,"◇ Predicted milestone");pr.style.cssText="margin-left:auto;color:var(--mute)";ov.appendChild(pr);p.appendChild(ov)}
+function chips(){const c=$("chips");c.innerHTML="";S.vehicles.filter(v=>v.kind===kind).forEach(v=>{const b=mk("button","chip"+(v.off?"":" on"),v.id);b.onclick=()=>{v.off=v.off?0:1;refresh()};c.appendChild(b)})}
+function legend(){const g=$("lg");g.innerHTML="";
+ const it=[...Object.entries(PT).map(([k,[n,c]])=>[k,n,`background:${c}`]),["fc","Runtime forecast","background:repeating-linear-gradient(45deg,#fff5 0 2px,#fff2 2px 4px);border:1px dashed #fff8"],
+  ...["cryo","static","launch","issue"].map(k=>[k,ET[k][0],`background:${ET[k][1]};border-radius:50%`])];
+ it.forEach(([k,n,st])=>{const b=mk("button",hid.has(k)?"off":"");const i=mk("i");i.style.cssText=st;b.append(i,n);
+  b.onclick=e=>{if(e.shiftKit||e.shiftKey){hid=new Set(it.map(a=>a[0]).filter(a=>a!==k))}else hid.has(k)?hid.delete(k):hid.add(k);legend();draw()};g.appendChild(b)})}
+function editor(){histUI();
+ const o=S.vehicles.map(v=>`<option>${v.id}</option>`).join("");document.querySelectorAll(".vsel").forEach(s=>{const c=s.value;s.innerHTML=o;s.value=c||s.value});
+ $("pt").innerHTML=Object.entries(PT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");
+ $("et").innerHTML=Object.entries(ET).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");
+ $("sk").innerHTML=STACKM.map(m=>`<option value="${m[0]}">${m[1]}${m[2]?" "+m[2]:""}</option>`).join("");
+ $("upd").textContent="Updated "+fd(ts(S.updated),fy);
+ const tb=$("rows");tb.innerHTML="";const row=(a,rm)=>{const tr=tb.insertRow();a.forEach(t=>tr.insertCell().textContent=t);const b=mk("button",0,"Delete");b.onclick=()=>{rm();change()};tr.insertCell().appendChild(b)};
+ S.vehicles.forEach(v=>row([v.id,v.kind,v.sub||"",""],()=>{S.vehicles=S.vehicles.filter(x=>x!==v);S.phases=S.phases.filter(p=>p.v!==v.id);S.events=S.events.filter(e=>e.v!==v.id)}));
+ S.stack.forEach(m=>row([m.v,"Stack: "+STACKM.find(a=>a[0]===m.k)[1]+(m.f?" (forecast)":""),m.d,""],()=>S.stack=S.stack.filter(x=>x!==m)));
+ S.phases.forEach(p=>row([p.v,PT[p.t][0]+(p.f?" (forecast)":""),p.s+" → "+(p.e||"ongoing"),""],()=>S.phases=S.phases.filter(x=>x!==p)));
+ S.events.filter(e=>e.t!=="ring"||true).forEach(e=>row([e.v,ET[e.t][0]+(e.f?" (forecast)":""),e.d,e.n||""],()=>S.events=S.events.filter(x=>x!==e)))}
+function refresh(){save();last=JSON.stringify(S);chips();legend();editor();draw()}
+$("tabs").onclick=e=>{const k=e.target.dataset.k;if(!k)return;kind=k;zoom=1;$("sc").scrollLeft=0;[...$("tabs").children].forEach(b=>b.classList.toggle("on",b===e.target));
+ $("h1").textContent=k==="ship"?"Starship Ship Production Timeline":"Starship Booster Production Timeline";$("vk").value=k;info("Click a bar or icon for details.");refresh()};
+$("views").onclick=e=>{const t=e.target.dataset.t;if(!t)return;[...$("views").children].forEach(b=>b.classList.toggle("on",b===e.target));$("tl").hidden=t!=="tl";$("pace").hidden=t!=="pace";$("pnote").hidden=t!=="pace";document.querySelector(".zoom").style.display=t==="pace"?"none":"";pace()};
+function zoomAt(f,cx){const sc=$("sc"),svg=$("svg"),W0=+svg.getAttribute("width"),mx=cx-sc.getBoundingClientRect().left,fr=(sc.scrollLeft+mx)/W0;
+ zoom=Math.min(20,Math.max(1,zoom*f));draw();sc.scrollLeft=fr*(+svg.getAttribute("width"))-mx}
+const mid=()=>{const r=$("sc").getBoundingClientRect();return r.left+r.width/2};
+$("zp").onclick=()=>zoomAt(1.3,mid());$("zm").onclick=()=>zoomAt(1/1.3,mid());$("zr").onclick=()=>{zoom=1;$("sc").scrollLeft=0;draw()};
+$("fv").onsubmit=e=>{e.preventDefault();const id=$("vi").value.trim();if(!id||S.vehicles.some(v=>v.id===id))return;S.vehicles.push({id,sub:$("vs").value.trim(),kind:$("vk").value});$("vi").value=$("vs").value="";change()};
+$("fp").onsubmit=e=>{e.preventDefault();S.phases=S.phases.filter(p=>!(p.v===$("pv").value&&p.t===$("pt").value));S.phases.push({v:$("pv").value,t:$("pt").value,s:$("ps").value,e:$("pe").value});change()};
+$("fs").onsubmit=e=>{e.preventDefault();S.stack=S.stack.filter(m=>!(m.v===$("sv").value&&m.k===$("sk").value));S.stack.push({v:$("sv").value,k:$("sk").value,d:$("sd").value});change()};
+$("fe").onsubmit=e=>{e.preventDefault();S.events=S.events.filter(x=>!(x.v===$("ev").value&&x.t===$("et").value&&(x.t!=="ring"||x.d===$("ed").value)));S.events.push({v:$("ev").value,t:$("et").value,d:$("ed").value,n:$("en").value.trim()});$("en").value="";change()};
+$("ex").onclick=()=>{$("io").hidden=false;$("io").value=JSON.stringify(S,null,1);$("io").select()};
+$("im").onclick=()=>{const io=$("io");if(io.hidden||!io.value.trim()){io.hidden=false;io.value="";io.placeholder="Paste JSON and click Import again";return}
+ try{const d=JSON.parse(io.value);if(d.vehicles&&d.phases&&d.events){snap();S=clean(d);S.updated=S.updated||iso();io.hidden=true;refresh()}}catch(x){io.value="Invalid JSON"}};
+$("rs").onclick=()=>{snap();S=JSON.parse(JSON.stringify(SAMPLE));refresh()};
+let dr=null;const sc=$("sc");sc.onmousedown=e=>dr={x:e.clientX,l:sc.scrollLeft};addEventListener("mouseup",()=>dr=null);addEventListener("mousemove",e=>{if(dr)sc.scrollLeft=dr.l-(e.clientX-dr.x)});
+sc.style.touchAction="pan-x";
+sc.addEventListener("wheel",e=>{if(Math.abs(e.deltaX)>Math.abs(e.deltaY))return;e.preventDefault();
+ const dy=e.deltaMode===1?e.deltaY*30:e.deltaY;zoomAt(Math.exp(-dy*0.002),e.clientX)},{passive:false});
+let pd=0;const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+sc.addEventListener("touchstart",e=>{pd=e.touches.length===2?dist(e.touches):0},{passive:true});
+sc.addEventListener("touchmove",e=>{if(e.touches.length!==2||!pd)return;e.preventDefault();const d=dist(e.touches);zoomAt(d/pd,(e.touches[0].clientX+e.touches[1].clientX)/2);pd=d},{passive:false});
+function editSub(v,sp){const i=document.createElement("input");i.value=v.sub||"";i.style.fontSize="11px";sp.replaceWith(i);i.focus();i.select();let done=0;
+ const fin=ok=>{if(done)return;done=1;if(ok&&i.value.trim()!==(v.sub||"")){v.sub=i.value.trim();change()}else draw()};
+ i.onkeydown=e=>{if(e.key==="Enter")fin(1);if(e.key==="Escape")fin(0)};i.onblur=()=>fin(1)}
+function shot(){
+ const isP=!$("pace").hidden,zs=zoom;if(!isP&&zoom!==1){zoom=1;draw()}
+ const esc=t=>String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;"),vs=S.vehicles.filter(v=>v.kind===kind&&!v.off);
+ const src=isP?$("pace").querySelector("svg"):$("svg"),c=src.cloneNode(true),cw=isP?1200:+src.getAttribute("width"),ch=isP?400:+src.getAttribute("height");
+ const LW=isP?0:176,HH=84,W=LW+cw+36;
+ c.setAttribute("x",LW+12);c.setAttribute("y",HH);c.setAttribute("width",cw);c.setAttribute("height",ch);
+ const ser=new XMLSerializer().serializeToString(c);if(!isP&&zs!==1){zoom=zs;draw()}
+ let items=[];
+ if(isP){vs.forEach((v,i)=>items.push({k:"line",c:VC[i%VC.length],t:v.id}));items.push({k:"dia",c:"#fff",t:"Predicted milestone"});["cryo","static","launch"].filter(k=>!phid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
+ else{Object.entries(PT).filter(([k])=>!hid.has(k)).forEach(([k,v])=>items.push({k:"box",c:v[1],t:v[0]}));if(!hid.has("fc"))items.push({k:"hatch",c:"#888",t:"Runtime forecast"});["cryo","static","launch","issue"].filter(k=>!hid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
+ let x=24,y=HH+ch+30,lg="";
+ items.forEach(it=>{const w=it.t.length*6.6+44;if(x+w>W-12){x=24;y+=26}
+  const cy=y-4;
+  if(it.k==="box")lg+=`<rect x="${x}" y="${cy-7}" width="14" height="14" rx="3" fill="${it.c}"/>`;
+  else if(it.k==="hatch")lg+=`<rect x="${x}" y="${cy-7}" width="14" height="14" rx="3" fill="#888" opacity=".5"/><rect x="${x}" y="${cy-7}" width="14" height="14" rx="3" fill="url(#h)" stroke="#fff9" stroke-dasharray="3 2"/>`;
+  else if(it.k==="dot")lg+=`<circle cx="${x+7}" cy="${cy}" r="7" fill="${it.c}"/>`;
+  else if(it.k==="line")lg+=`<line x1="${x}" x2="${x+22}" y1="${cy}" y2="${cy}" stroke="${it.c}" stroke-width="2"/>`;
+  else lg+=`<rect x="${x+2}" y="${cy-5}" width="10" height="10" transform="rotate(45 ${x+7} ${cy})" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="2 2"/>`;
+  lg+=`<text x="${x+(it.k==="line"?30:22)}" y="${cy+4}" style="font:12px Inter,system-ui,sans-serif;fill:#cfd4dc">${esc(it.t)}</text>`;x+=w+(it.k==="line"?8:0)});
+ const H=y+24;let body=`<text x="24" y="46" style="font:700 30px Inter,system-ui,sans-serif;fill:#f3ede4">${esc($("h1").textContent)}</text><text x="${W-24}" y="42" text-anchor="end" style="font:13px Inter,system-ui,sans-serif;fill:#9098a5">${esc($("upd").textContent)}</text>`;
+ if(!isP)vs.forEach((v,i)=>{const y0=HH+34+i*RH;body+=`<text x="24" y="${y0+40}" style="font:700 14px Inter,system-ui,sans-serif;fill:#f3ede4">${esc(v.id)}</text><text x="24" y="${y0+56}" style="font:11px Inter,system-ui,sans-serif;fill:#9098a5">${esc(v.sub||"")}</text>`});
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><style>text{fill:#9098a5;font:10px Inter,system-ui,sans-serif}.lb{fill:#fff;font-size:11px}</style><rect width="100%" height="100%" fill="#0c0f14"/>${body}${ser}${lg}</svg>`;
+ const img=new Image();img.onload=()=>{const cv=document.createElement("canvas");cv.width=W*2;cv.height=H*2;const g=cv.getContext("2d");g.scale(2,2);g.drawImage(img,0,0);showImg(cv.toDataURL("image/png"),`starship-${kind}-${isP?"pace":"timeline"}.png`)};
+ img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)}
+function showImg(url,name){const m=document.createElement("div");m.style.cssText="position:fixed;inset:0;background:#000d;z-index:99;display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px;overflow:auto";
+ const im=new Image();im.src=url;im.style.cssText="max-width:100%;border-radius:8px;height:auto";const bar=mk("div");bar.style.cssText="display:flex;gap:8px";
+ const a=mk("a",0,"Download PNG");a.href=url;a.download=name;a.style.cssText="background:var(--acc);color:#fff;border-radius:8px;padding:8px 14px;text-decoration:none;font-weight:600";
+ const x=mk("button",0,"Close");x.onclick=()=>m.remove();bar.append(a,x);m.append(bar,im);m.onclick=e=>{if(e.target===m)m.remove()};document.body.appendChild(m);try{a.click()}catch(e){}}
+$("shot").onclick=shot;$("un").onclick=undo;$("re").onclick=redoF;
+addEventListener("keydown",e=>{if(page==="settings"&&(e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"&&!/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName)){e.preventDefault();e.shiftKey?redoF():undo()}});
+let page=location.hash==="#settings"?"settings":"view";
+let unlocked=false;
+function route(){const lock=page==="settings"&&!!PIN_HASH&&!unlocked;$("view").hidden=page!=="view";$("settings").hidden=page!=="settings";$("gate").hidden=!lock;$("setc").hidden=lock;if(page==="view")draw();scrollTo(0,0)}
+$("gf").onsubmit=async e=>{e.preventDefault();const m=$("gm");let L={n:0,u:0};try{L=JSON.parse(localStorage.getItem("ss-lock"))||L}catch(x){}
+ const wait=Math.ceil((L.u-Date.now())/1000);if(wait>0){m.textContent="Too many attempts. Try again in "+wait+"s.";return}
+ if(!(window.crypto&&crypto.subtle)){m.textContent="This browser cannot verify the PIN.";return}
+ m.textContent="Checking…";const hh=await hashPin($("gp").value);
+ if(hh===PIN_HASH){unlocked=true;try{localStorage.removeItem("ss-lock")}catch(x){}$("gp").value="";m.textContent="";route()}
+ else{L.n++;if(L.n>=3)L.u=Date.now()+Math.min(30*Math.pow(2,L.n-3),3600)*1000;try{localStorage.setItem("ss-lock",JSON.stringify(L))}catch(x){}m.textContent="Wrong PIN.";$("gp").value=""}};
+function go(p){page=p;try{location.hash=p==="settings"?"settings":""}catch(e){}route()}
+$("upd").onclick=e=>{if(e.detail===3)go("settings")};$("back").onclick=e=>{e.preventDefault();go("view")};
+addEventListener("hashchange",()=>{page=location.hash==="#settings"?"settings":"view";route()});
+addEventListener("resize",draw);refresh();route();
+</script></body></html>
