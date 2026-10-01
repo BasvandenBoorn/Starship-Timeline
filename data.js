@@ -5,13 +5,13 @@ const SAMPLE = {
    "id": "B19",
    "sub": "Flight 12",
    "kind": "booster",
-   "off": 1
+   "off": 0
   },
   {
    "id": "B20",
    "sub": "Flight 13",
    "kind": "booster",
-   "off": 1
+   "off": 0
   },
   {
    "id": "B21",
@@ -41,13 +41,13 @@ const SAMPLE = {
    "id": "S39",
    "sub": "Flight 12",
    "kind": "ship",
-   "off": 1
+   "off": 0
   },
   {
    "id": "S40",
    "sub": "Flight 13",
    "kind": "ship",
-   "off": 1
+   "off": 0
   },
   {
    "id": "S41",
@@ -58,22 +58,26 @@ const SAMPLE = {
   {
    "id": "S42",
    "sub": "Flight 15",
-   "kind": "ship"
+   "kind": "ship",
+   "off": 0
   },
   {
    "id": "S43",
    "sub": "Flight 16",
-   "kind": "ship"
+   "kind": "ship",
+   "off": 0
   },
   {
    "id": "S44",
    "sub": "Flight 17",
-   "kind": "ship"
+   "kind": "ship",
+   "off": 0
   },
   {
    "id": "S45",
    "sub": "Flight 18",
-   "kind": "ship"
+   "kind": "ship",
+   "off": 0
   }
  ],
  "phases": [
@@ -652,6 +656,24 @@ const SAMPLE = {
    "v": "S42",
    "t": "cryo",
    "d": "2026-09-03",
+   "n": ""
+  },
+  {
+   "v": "S39",
+   "t": "launch",
+   "d": "2026-05-22",
+   "n": ""
+  },
+  {
+   "v": "S40",
+   "t": "launch",
+   "d": "2026-07-24",
+   "n": ""
+  },
+  {
+   "v": "S41",
+   "t": "launch",
+   "d": "2026-08-28",
    "n": ""
   }
  ],
