@@ -132,7 +132,7 @@ const KEY="ss-timeline-v2",D=864e5,RH=84,NS="http://www.w3.org/2000/svg";
 const $=i=>document.getElementById(i),ts=s=>+new Date(s+"T00:00:00");
 const fd=(t,o)=>new Date(t).toLocaleDateString("en-GB",o||{day:"numeric",month:"short"}),fy={day:"numeric",month:"short",year:"numeric"};
 function clean(d){d.stack=(d.stack||[]).filter(m=>!m.f);d.phases=d.phases.filter(p=>!p.f);d.events=d.events.filter(e=>!e.f);return d}
-function load(){let d;try{const r=localStorage.getItem(KEY);if(r)d=JSON.parse(r)}catch(e){}if(!d)d=JSON.parse(JSON.stringify(SAMPLE));return clean(d)}
+function load(){return clean(JSON.parse(JSON.stringify(SAMPLE)))}
 const iso=()=>new Date().toLocaleDateString("sv-SE");
 function change(){S.updated=iso();snap();refresh()}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
