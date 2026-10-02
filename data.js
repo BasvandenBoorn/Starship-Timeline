@@ -209,7 +209,8 @@ const SAMPLE = {
   {"v": "S44", "k": "FX4", "d": "2026-09-24"},
   {"v": "S45", "k": "first", "d": "2026-09-22"},
   {"v": "S44", "k": "CX3", "d": "2026-10-01"},
-  {"v": "B24", "k": "A4", "d": "2026-10-01"}
+  {"v": "B24", "k": "A4", "d": "2026-10-01"},
+  {"v": "S44", "k": "CX3", "d": "2026-10-02"}
  ],
  "bench": {"booster": {"stack": {"days": 46, "src": "B22"}, "outfit": {"days": 15, "src": "B18"}, "proof": {"days": 3, "src": "B20"}, "raptor": {"days": 28, "src": "B19"}, "lpt": {"days": 3, "src": "B20"}, "flight": {"days": 12, "src": "B20"}}, "ship": {}},
  "ref": {"booster": "B22", "ship": "S41"}
