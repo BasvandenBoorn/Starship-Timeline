@@ -78,8 +78,11 @@ button:not(:disabled):hover{filter:brightness(1.25)}
 <div id="gate" class="card ed" hidden><h2>Settings are locked</h2><p>Enter the PIN to continue.</p><form id="gf" style="display:flex;gap:8px;grid-template-columns:none"><input id="gp" type="password" placeholder="PIN" autocomplete="off"><button>Unlock</button></form><p id="gm"></p></div>
 <div id="setc">
 <div class="card ed"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button id="un">Undo</button><button id="re">Redo</button><span style="color:var(--mute)">Undo or redo your changes (until you reload the page).</span></div></div>
+<div class="card ed"><h2>Forecast benchmarks</h2><p>Reference durations the forecast uses per phase. Leave Days empty for "auto" (the fastest completed phase found in your data). The stack reference vehicle is used to match stacking progress.</p>
+ <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px"><label>Booster stack reference<select id="rfb"></select></label><label>Ship stack reference<select id="rfs"></select></label></div>
+ <div class="tw"><table><thead><tr><th>Phase</th><th>Booster days</th><th>Booster source</th><th>Ship days</th><th>Ship source</th></tr></thead><tbody id="bt"></tbody></table></div></div>
 <div class="card ed">
- <h2>Enter milestones</h2><p>Everything is stored in your browser. Export a JSON backup. Forecasts use the same method as starship-timeline.pages.dev: a fastest-benchmark duration per phase, with stacking matched against a reference vehicle (edit BENCH / STACK_REF at the top of the script). You can enter the same vehicle + phase/milestone/event multiple times; existing entries are kept. Leave End empty for a phase that is still in progress.</p>
+ <h2>Enter milestones</h2><p>Changes only live until you reload the page: use Export data.js and put the result in data.js on GitHub. Forecasts use the same method as starship-timeline.pages.dev: a fastest-benchmark duration per phase, with stacking matched against a reference vehicle (edit BENCH / STACK_REF at the top of the script). You can enter the same vehicle + phase/milestone/event multiple times; existing entries are kept. Leave End empty for a phase that is still in progress.</p>
  <form id="fv"><label>Vehicle ID<input id="vi" placeholder="B25 or S42" required></label><label>Description<input id="vs" placeholder="Stacking"></label>
   <label>Type<select id="vk"><option value="booster">Booster</option><option value="ship">Ship</option></select></label><button>Add vehicle</button></form>
  <form id="fp"><label>Vehicle<select class="vsel" id="pv"></select></label><label>Phase<select id="pt"></select></label>
@@ -92,7 +95,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
  <div style="margin-bottom:10px"><select id="tf"></select></div>
  <div class="tw"><table><thead><tr><th>Vehicle</th><th>Type</th><th>When</th><th>Note</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
-  <button id="ex">Export JSON</button><button id="im">Import JSON</button><button id="rs">Reset to sample data</button></div>
+  <button id="ex">Export data.js</button><button id="im">Import data</button><button id="rs">Reset to sample data</button></div>
  <textarea id="io" hidden rows="6" style="width:100%;margin-top:10px;background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:8px"></textarea>
 </div>
 
@@ -124,10 +127,10 @@ const wavg=a=>{ // robust + recency-weighted mean of [{x,t}] (only used as fallb
  a.forEach((q,i)=>{const w=Math.pow(2,1.5*i/(n-1))/(1+Math.pow((q.x-med)/(2*sc),2));sw+=w;sx+=w*q.x});return sx/sw};
 function derive(){
  const bd=ts(S.updated),P=S.phases,E=S.events,K=S.stack,kd=id=>(S.vehicles.find(v=>v.id===id)||{}).kind,done=P.filter(p=>p.e);
- const bench=(k,t)=>{const b=(BENCH[k]||{})[t];if(b)return b;let best=null;done.forEach(p=>{if(p.t!==t||kd(p.v)!==k)return;const d=Math.round((ts(p.e)-ts(p.s))/D);if(!best||d<best.days)best={days:d,src:p.v}});return best||{days:DEFDUR[t],src:"default"}};
+ const bench=(k,t)=>{const b=((S.bench||BENCH)[k]||{})[t];if(b)return b;let best=null;done.forEach(p=>{if(p.t!==t||kd(p.v)!==k)return;const d=Math.round((ts(p.e)-ts(p.s))/D);if(!best||d<best.days)best={days:d,src:p.v}});return best||{days:DEFDUR[t],src:"default"}};
  const t0of=id=>{const f=K.find(m=>m.v===id&&m.k==="first");if(f)return ts(f.d);const s=P.filter(p=>p.v===id&&p.t==="stack");return s.length?Math.min(...s.map(p=>ts(p.s))):null};
  const offs=(k,kk)=>{const d=K.filter(m=>m.k===k&&kd(m.v)===kk&&t0of(m.v)!=null).map(m=>({x:(ts(m.d)-t0of(m.v))/D,t:ts(m.d)}));return wavg(d)};
- const stackEst=v=>{const rid=STACK_REF[v.kind];if(!rid||rid===v.id)return null;const rk=K.filter(m=>m.v===rid),sp=done.filter(p=>p.v===rid&&p.t==="stack"),rc=rk.find(m=>m.k==="complete"),rEnd=sp.length?Math.max(...sp.map(p=>ts(p.e))):rc?ts(rc.d):null;if(rEnd==null)return null;
+ const stackEst=v=>{const rid=(S.ref||STACK_REF)[v.kind];if(!rid||rid===v.id)return null;const rk=K.filter(m=>m.v===rid),sp=done.filter(p=>p.v===rid&&p.t==="stack"),rc=rk.find(m=>m.k==="complete"),rEnd=sp.length?Math.max(...sp.map(p=>ts(p.e))):rc?ts(rc.d):null;if(rEnd==null)return null;
   let best=null;K.filter(m=>m.v===v.id&&m.k!=="complete").forEach(m=>{const r=rk.find(x=>x.k===m.k);if(!r)return;const c={date:ts(m.d)+(rEnd-ts(r.d)),obs:ts(m.d),src:ts(r.d),k:(sm(v.kind).find(z=>z[0]===m.k)||[0,m.k])[1],rid};if(!best||c.obs>best.obs||(c.obs===best.obs&&c.src>best.src))best=c});return best};
  const o={phases:[],events:[...E],stack:[...K]};
  S.vehicles.forEach(v=>{
@@ -141,7 +144,7 @@ function derive(){
    if(ek&&!E.some(x=>x.v===v.id&&x.t===ek))o.events.push({v:v.id,t:ek,d:dstr(e),f:1,n:est?"Predicted from matched "+est.k+" progress on "+est.rid+".":"Predicted from "+b.days+"-day "+PNAME[t]+" benchmark set by "+b.src+"."});
    s=e}
   const t0=t0of(v.id);if(t0!=null){const st=K.filter(m=>m.v===v.id),ks=sm(v.kind).map(m=>m[0]).filter(k=>k!=="first"&&k!=="complete");let la=-1;ks.forEach((k,i)=>{if(st.some(m=>m.k===k))la=i});
-   const rid=STACK_REF[v.kind],rk=K.filter(m=>m.v===rid&&rid!==v.id),rd=k=>{const m=rk.find(x=>x.k===k);return m?ts(m.d):null};
+   const rid=(S.ref||STACK_REF)[v.kind],rk=K.filter(m=>m.v===rid&&rid!==v.id),rd=k=>{const m=rk.find(x=>x.k===k);return m?ts(m.d):null};
    const lk=la>=0?ks[la]:"first",lastObs=Math.max(t0,...st.filter(m=>m.k!=="first").map(m=>ts(m.d)));let prev=lastObs;
    ks.slice(la+1).forEach(k=>{let d=null;const a=rd(k),b0=rd(lk);if(a!=null&&b0!=null)d=lastObs+(a-b0);else{const q=offs(k,v.kind);if(q!=null)d=t0+Math.round(q)*D}
     if(d==null)return;prev=Math.max(d,prev,bd);o.stack.push({v:v.id,k,d:dstr(prev),f:1})})}});
@@ -153,7 +156,7 @@ async function hashPin(p){const k=await crypto.subtle.importKey("raw",new TextEn
 const KEY="ss-timeline-v2",D=864e5,RH=84,NS="http://www.w3.org/2000/svg";
 const $=i=>document.getElementById(i),ts=s=>+new Date(s+"T00:00:00");
 const fd=(t,o)=>new Date(t).toLocaleDateString("en-GB",o||{day:"numeric",month:"short"}),fy={day:"numeric",month:"short",year:"numeric"};
-function clean(d){d.stack=(d.stack||[]).filter(m=>!m.f);d.phases=d.phases.filter(p=>!p.f);d.events=d.events.filter(e=>!e.f);return d}
+function clean(d){d.stack=(d.stack||[]).filter(m=>!m.f);d.phases=d.phases.filter(p=>!p.f);d.events=d.events.filter(e=>!e.f);d.bench=d.bench||JSON.parse(JSON.stringify(BENCH));d.ref=d.ref||{...STACK_REF};return d}
 const DATA_OK=typeof SAMPLE!=="undefined",DATA=DATA_OK?SAMPLE:{updated:new Date().toLocaleDateString("sv-SE"),vehicles:[],stack:[],phases:[],events:[]}; // data.js missing? the page still opens (empty)
 function load(){return clean(JSON.parse(JSON.stringify(DATA)))}
 const iso=()=>new Date().toLocaleDateString("sv-SE");
@@ -178,7 +181,7 @@ function updRange(){if(!VR)return;const sc=$("sc"),a=VR.min+sc.scrollLeft/VR.ppd
 function draw(){TT.style.display="none";
  const vs=S.vehicles.filter(v=>v.kind===kind&&!v.off),ids=vs.map(v=>v.id);
  X=derive();const ph=X.phases.filter(p=>ids.includes(p.v)),ev=X.events.filter(e=>ids.includes(e.v));
- const now=Date.now(),all=[now,ts(S.updated),...ph.flatMap(p=>[ts(p.s),ts(p.e)]),...ev.map(e=>ts(e.d))];
+ const now=Date.now(),all=[now,ts(S.updated),...ph.flatMap(p=>[ts(p.s),ts(p.e)]),...ev.map(e=>ts(e.d)),...X.stack.filter(m=>ids.includes(m.v)&&!m.f).map(m=>ts(m.d))];
  const min=Math.min(...all)-14*D,max=Math.max(...all)+30*D,days=(max-min)/D;
  const sc=$("sc"),ppd=Math.max(sc.clientWidth-20,300)/days*zoom,W=Math.ceil(days*ppd),H=34+vs.length*RH+6,x=t=>(t-min)/D*ppd;
  VR={min,max,ppd};updRange();
@@ -198,6 +201,10 @@ function draw(){TT.style.display="none";
    else sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c},g);
    const nm=PT[p.t][2]??""; if(nm&&w>nm.length*6.5+10)sv("text",{x:x1+7,y:y0+48,class:"lb"},g,nm);
    tipOn(g,[v.id+" · "+PT[p.t][0],fd(ts(p.s),fy)+" → "+fd(ts(p.e),fy)+" ("+Math.round((ts(p.e)-ts(p.s))/D)+" days)"+(p.f?" · forecast":""),p.n||""]);g.onclick=()=>info(`${v.id} · ${PT[p.t][0]} · ${fd(ts(p.s),fy)} → ${fd(ts(p.e),fy)}${p.f?" · forecast":""}${p.n?" · "+p.n:""}`)});
+  if(!hid.has("stack")){const sms=X.stack.filter(m=>m.v===v.id&&!m.f),lm=Math.max(0,...sms.map(m=>ts(m.d))),f0=sms.find(m=>m.k==="first"),sp=ph.filter(p=>p.v===v.id&&p.t==="stack"),t0=f0?ts(f0.d):sp.length?Math.min(...sp.map(p=>ts(p.s))):null;
+   sms.forEach(m=>{const df=sm(v.kind).find(a=>a[0]===m.k)||[0,m.k,""],late=ts(m.d)===lm,n=sv("circle",{cx:x(ts(m.d)),cy:y0+18,r:late?6:5,fill:late?"#fff":"none",stroke:"#fff","stroke-width":late?2.2:1.6,style:"cursor:pointer"},svg),
+    tt=[v.id+" · "+df[1]+(df[2]?" ("+df[2]+")":""),fd(ts(m.d),fy)+(t0!=null?" · "+Math.round((ts(m.d)-t0)/D)+" days after first section":""),"Stack progress"];
+    tipOn(n,tt);n.onclick=()=>info(tt.join(" · "))})}
   ev.filter(e=>e.v===v.id&&!hid.has(e.t)&&!(e.f&&hid.has("fc"))).forEach(e=>{
    const cx=x(ts(e.d)),ring=e.t==="ring",cy=y0+(ring?18:70),c=ET[e.t][1];
    const n=ring?sv("circle",{cx,cy,r:5,fill:"none",stroke:"#fff","stroke-width":1.6},svg)
@@ -257,7 +264,12 @@ function startEdit(k,o){endEdit();editing={k,o};const f=$(FM[k][0]),b=f.querySel
  if(k==="s"){$("sv").value=o.v;fillSk();$("sk").value=o.k;$("sd").value=o.d}
  if(k==="e"){$("ev").value=o.v;fillEt();$("et").value=o.t;$("ed").value=o.d;$("en").value=o.n||""}
  f.scrollIntoView({behavior:"smooth",block:"center"})}
-function editor(){histUI();
+function benchUI(){const B=S.bench,b=$("bt");b.innerHTML="";
+ Object.keys(PT).forEach(t=>{const tr=b.insertRow();tr.insertCell().textContent=PT[t][0];
+  ["booster","ship"].forEach(k=>{const cur=(B[k]||{})[t]||{},d=mk("input"),w=mk("input");d.type="number";d.min=0;d.placeholder="auto";d.value=cur.days??"";d.style.width="84px";w.placeholder="source";w.value=cur.src||"";w.style.width="96px";
+   const put=()=>{B[k]=B[k]||{};if(d.value==="")delete B[k][t];else B[k][t]={days:+d.value,src:w.value.trim()};change()};d.onchange=put;w.onchange=put;tr.insertCell().append(d);tr.insertCell().append(w)})});
+ [["rfb","booster"],["rfs","ship"]].forEach(([id,k])=>{const sel=$(id);sel.innerHTML='<option value="">(none)</option>'+S.vehicles.filter(v=>v.kind===k).map(v=>`<option>${v.id}</option>`).join("");sel.value=S.ref[k]||"";sel.onchange=()=>{S.ref[k]=sel.value;change()}})}
+function editor(){histUI();benchUI();
  const o=S.vehicles.map(v=>`<option>${v.id}</option>`).join("");document.querySelectorAll(".vsel").forEach(s=>{const c=s.value;s.innerHTML=o;s.value=c||s.value});
  $("pt").innerHTML=Object.entries(PT).map(([k,v])=>`<option value="${k}">${v[0]}</option>`).join("");
  fillEt();
@@ -285,9 +297,11 @@ $("fp").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="p"?editin
 $("tf").onchange=()=>{tf=$("tf").value;editor()};$("sv").onchange=fillSk;$("ev").onchange=fillEt;
 $("fs").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="s"?editing.o:null;S.stack=S.stack.filter(m=>m!==ed);S.stack.push({v:$("sv").value,k:$("sk").value,d:$("sd").value});endEdit();change()};
 $("fe").onsubmit=e=>{e.preventDefault();const ed=editing&&editing.k==="e"?editing.o:null;S.events=ed?S.events.filter(x=>x!==ed):S.events;S.events.push({v:$("ev").value,t:$("et").value,d:$("ed").value,n:$("en").value.trim()});$("en").value="";endEdit();change()};
-$("ex").onclick=()=>{$("io").hidden=false;$("io").value=JSON.stringify(S,null,1);$("io").select()};
-$("im").onclick=()=>{const io=$("io");if(io.hidden||!io.value.trim()){io.hidden=false;io.value="";io.placeholder="Paste JSON and click Import again";return}
- try{const d=JSON.parse(io.value);if(d.vehicles&&d.phases&&d.events){snap();S=clean(d);S.updated=S.updated||iso();io.hidden=true;refresh()}}catch(x){io.value="Invalid JSON"}};
+const fmt=v=>v&&typeof v==="object"?(Array.isArray(v)?"["+v.map(fmt).join(", ")+"]":"{"+Object.entries(v).map(([k,x])=>JSON.stringify(k)+": "+fmt(x)).join(", ")+"}"):JSON.stringify(v);
+const toDataJs=d=>"const SAMPLE = {\n"+Object.entries(d).map(([k,v])=>Array.isArray(v)&&v.length?` "${k}": [\n`+v.map(x=>"  "+fmt(x)).join(",\n")+"\n ]":` "${k}": ${fmt(v)}`).join(",\n")+"\n};\n";
+$("ex").onclick=()=>{$("io").hidden=false;$("io").value=toDataJs(S);$("io").select()};
+$("im").onclick=()=>{const io=$("io");if(io.hidden||!io.value.trim()){io.hidden=false;io.value="";io.placeholder="Paste data.js or JSON and click Import again";return}
+ try{const d=JSON.parse(io.value.replace(/^\s*(?:const|let|var)\s+SAMPLE\s*=\s*/,"").replace(/;\s*$/,""));if(d.vehicles&&d.phases&&d.events){snap();S=clean(d);S.updated=S.updated||iso();io.hidden=true;refresh()}}catch(x){io.value="Invalid JSON"}};
 $("rs").onclick=()=>{snap();S=JSON.parse(JSON.stringify(DATA));refresh()};
 let dr=null;const sc=$("sc");sc.onmousedown=e=>dr={x:e.clientX,l:sc.scrollLeft};addEventListener("mouseup",()=>dr=null);addEventListener("mousemove",e=>{if(dr)sc.scrollLeft=dr.l-(e.clientX-dr.x)});
 sc.style.touchAction="pan-x";
