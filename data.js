@@ -1,4 +1,4 @@
-const SAMPLE = const SAMPLE = {
+const SAMPLE = {
  "updated": "2026-10-02",
  "vehicles": [
   {"id": "B19", "sub": "Flight 12", "kind": "booster", "off": 1},
