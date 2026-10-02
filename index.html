@@ -201,10 +201,11 @@ function draw(){TT.style.display="none";
    else sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c},g);
    const nm=PT[p.t][2]??""; if(nm&&w>nm.length*6.5+10)sv("text",{x:x1+7,y:y0+48,class:"lb"},g,nm);
    tipOn(g,[v.id+" · "+PT[p.t][0],fd(ts(p.s),fy)+" → "+fd(ts(p.e),fy)+" ("+Math.round((ts(p.e)-ts(p.s))/D)+" days)"+(p.f?" · forecast":""),p.n||""]);g.onclick=()=>info(`${v.id} · ${PT[p.t][0]} · ${fd(ts(p.s),fy)} → ${fd(ts(p.e),fy)}${p.f?" · forecast":""}${p.n?" · "+p.n:""}`)});
-  if(!hid.has("stack")){const sms=X.stack.filter(m=>m.v===v.id&&!m.f),lm=Math.max(0,...sms.map(m=>ts(m.d))),f0=sms.find(m=>m.k==="first"),sp=ph.filter(p=>p.v===v.id&&p.t==="stack"),t0=f0?ts(f0.d):sp.length?Math.min(...sp.map(p=>ts(p.s))):null;
-   sms.forEach(m=>{const df=sm(v.kind).find(a=>a[0]===m.k)||[0,m.k,""],late=ts(m.d)===lm,n=sv("circle",{cx:x(ts(m.d)),cy:y0+18,r:late?6:5,fill:late?"#fff":"none",stroke:"#fff","stroke-width":late?2.2:1.6,style:"cursor:pointer"},svg),
-    tt=[v.id+" · "+df[1]+(df[2]?" ("+df[2]+")":""),fd(ts(m.d),fy)+(t0!=null?" · "+Math.round((ts(m.d)-t0)/D)+" days after first section":""),"Stack progress"];
-    tipOn(n,tt);n.onclick=()=>info(tt.join(" · "))})}
+  if(!hid.has("stack")){const sms=X.stack.filter(m=>m.v===v.id&&!m.f&&m.k!=="complete").sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0),f0=X.stack.find(m=>m.v===v.id&&m.k==="first"&&!m.f),sp=ph.filter(p=>p.v===v.id&&p.t==="stack"),t0=f0?ts(f0.d):sp.length?Math.min(...sp.map(p=>ts(p.s))):null;
+   const cm=X.stack.find(m=>m.v===v.id&&m.k==="complete"&&!m.f),rp=S.phases.find(p=>p.v===v.id&&p.t==="stack"&&p.e),cd=cm?cm.d:rp?rp.e:null; // big ring only when stacking is finished
+   const ring=(d,title,big)=>{const n=sv("circle",{cx:x(ts(d)),cy:y0+18,r:big?7:5,fill:big?"#fff":"#151b25",stroke:"#fff","stroke-width":big?2.4:1.6,style:"cursor:pointer"},svg),tt=[v.id+" · "+title,fd(ts(d),fy)+(t0!=null?" · "+Math.round((ts(d)-t0)/D)+" days after first section":""),"Stack progress"];tipOn(n,tt);n.onclick=()=>info(tt.join(" · "))};
+   sms.forEach(m=>{const df=sm(v.kind).find(a=>a[0]===m.k)||[0,m.k,""];ring(m.d,df[1]+(df[2]?" ("+df[2]+")":""),false)}); // oldest first, so newer rings sit on top
+   if(cd)ring(cd,"Complete (stacking finished)",true)}
   ev.filter(e=>e.v===v.id&&!hid.has(e.t)&&!(e.f&&hid.has("fc"))).forEach(e=>{
    const cx=x(ts(e.d)),ring=e.t==="ring",cy=y0+(ring?18:70),c=ET[e.t][1];
    const n=ring?sv("circle",{cx,cy,r:5,fill:"none",stroke:"#fff","stroke-width":1.6},svg)
