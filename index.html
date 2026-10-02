@@ -100,6 +100,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
 </div>
 
 </div></div></main>
+<script>window.__dataErr="";addEventListener("error",function(e){if(e.filename&&/data\.js/.test(e.filename))window.__dataErr=e.message},true)</script>
 <script src="data.js"></script>
 <script>
 const PT={stack:["Stacking","#2f6650","Stack"],outfit:["Outfitting / wait","#6e5626","Outfit"],raptor:["Raptor integration","#84591a","Raptors"],proof:["Proof / cryo","#2f5568"],lpt:["Launch-pad tests","#6a4a3a"],flight:["Flight integration","#57467e","Flight prep"]};
@@ -358,5 +359,5 @@ $("upd").onclick=e=>{if(e.detail===3)go("settings")};$("back").onclick=e=>{e.pre
 addEventListener("hashchange",()=>{page=location.hash==="#settings"?"settings":"view";route()});
 $("sc").addEventListener("scroll",updRange,{passive:true});
 addEventListener("resize",draw);refresh();route();
-if(!DATA_OK){const b=document.createElement("div");b.style.cssText="background:#3a1d1d;border:1px solid #7a2e2e;color:#ffd6d6;border-radius:10px;padding:12px 14px;margin-bottom:16px";b.textContent="data.js could not be loaded. Put data.js in the same folder as index.html (exact name, lowercase) and reload.";$("view").prepend(b)}
+if(!DATA_OK){const b=document.createElement("div");b.style.cssText="background:#3a1d1d;border:1px solid #7a2e2e;color:#ffd6d6;border-radius:10px;padding:12px 14px;margin-bottom:16px";b.textContent=window.__dataErr?"data.js has an error: "+window.__dataErr+". Check the first line: it must start with exactly one \"const SAMPLE = {\".":"data.js could not be loaded. Put data.js in the same folder as index.html (exact name, lowercase) and reload.";$("view").prepend(b)}
 </script></body></html>
