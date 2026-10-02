@@ -112,7 +112,9 @@ const STACKS={
  booster:[["first","First section",""],["A3","A3","M:11"],["A4","A4","M:15"],["A5","A5","M:19"],["A6","A6","M:23"],["AX","AX","A:25"],["F2","F2",""],["FX","FX","F:7"],["F3","F3","F:11"],["complete","Complete",""]],
  ship:[["first","First section",""],["pez","PEZ",""],["FX4","FX","N:7"],["CX3","CX","N:10"],["A23","A2","N:13"],["A34","A3","N:17"],["complete","Complete",""]]};
 const sm=k=>STACKS[k]||STACKS.booster,smv=id=>sm((S.vehicles.find(v=>v.id===id)||{}).kind);
-const VC=["#63b58a","#d9748f","#4db5cf","#f3f3f3","#e8a04a","#a58bf0"];let phid=new Set();
+const VC=["#e8a04a","#a58bf0","#63b58a","#d9748f","#4db5cf","#f3f3f3","#e6c229","#7bd88f","#ff8a65","#9aa7b8"]; // 3rd-6th vehicle = green, pink, blue, white (like the original for B21-B24)
+// every vehicle keeps its own line colour (position among all vehicles of its kind), whatever filters are active
+const vcol=v=>VC[Math.max(0,S.vehicles.filter(x=>x.kind===v.kind).findIndex(x=>x.id===v.id))%VC.length];let phid=new Set();
 const ORDER=["stack","outfit","proof","raptor","lpt","flight"],DEFDUR={stack:50,outfit:20,proof:4,raptor:30,lpt:3,flight:20}; // last-resort durations (days)
 const PNAME={stack:"stacking",outfit:"outfitting",proof:"cryo proof",raptor:"Raptor integration",lpt:"launch-pad test",flight:"flight prep"};
 // PREDICTION: same method as starship-timeline.pages.dev. Every phase gets a fixed "fastest comparable" duration (BENCH: days + source vehicle).
@@ -228,7 +230,7 @@ function pace(){
    if(sk.has(c.k)){const m=get(c.k);if(m){d=ts(m.d);f=m.f}else if(c.k==="first")d=t0;else if(c.k==="complete"&&sp.length){const q=sp.reduce((x,y)=>ts(y.e)>ts(x.e)?y:x);d=ts(q.e);f=q.f}}
    else{const e=X.events.find(e=>e.v===v.id&&e.t===c.k);if(e){d=ts(e.d);f=e.f}}
    if(d!=null)a.push({i,c,d,f:f?1:0,n:Math.round((d-t0)/D)})});
-  return{v,c:VC[vi%VC.length],a}});
+  return{v,c:vcol(v),a}});
  const top=mk("div");top.style.cssText="display:flex;justify-content:space-between;color:var(--mute);gap:10px;flex-wrap:wrap";
  top.append(mk("span",0,"Days since first observed section"),mk("span",0,"Tap a point for its date and source milestone"));p.appendChild(top);
  const lg=mk("div");lg.style.cssText="display:flex;gap:22px;flex-wrap:wrap;margin:16px 0 4px 20px";
@@ -323,7 +325,7 @@ function shot(){
  c.setAttribute("x",LW+12);c.setAttribute("y",HH);c.setAttribute("width",cw);c.setAttribute("height",ch);
  const ser=new XMLSerializer().serializeToString(c);if(!isP&&zs!==1){zoom=zs;draw()}
  let items=[];
- if(isP){vs.forEach((v,i)=>items.push({k:"line",c:VC[i%VC.length],t:v.id}));items.push({k:"dia",c:"#fff",t:"Predicted milestone"});["cryo","static","launch"].filter(k=>!phid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
+ if(isP){vs.forEach(v=>items.push({k:"line",c:vcol(v),t:v.id}));items.push({k:"dia",c:"#fff",t:"Predicted milestone"});["cryo","static","launch"].filter(k=>!phid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
  else{Object.entries(PT).filter(([k])=>!hid.has(k)).forEach(([k,v])=>items.push({k:"box",c:v[1],t:v[0]}));if(!hid.has("fc"))items.push({k:"hatch",c:"#888",t:"Runtime forecast"});EVL().filter(k=>!hid.has(k)).forEach(k=>items.push({k:"dot",c:ET[k][1],t:ET[k][0]}))}
  let x=24,y=HH+ch+30,lg="";
  items.forEach(it=>{const w=it.t.length*6.6+44;if(x+w>W-12){x=24;y+=26}
