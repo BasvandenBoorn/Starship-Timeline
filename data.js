@@ -1,5 +1,5 @@
 const SAMPLE = {
- "updated": "2026-10-06",
+ "updated": "2026-10-08",
  "vehicles": [
   {"id": "B19", "sub": "Flight 12", "kind": "booster", "off": 1},
   {"id": "B20", "sub": "Flight 13", "kind": "booster", "off": 1},
@@ -212,7 +212,8 @@ const SAMPLE = {
   {"v": "B24", "k": "A4", "d": "2026-10-01"},
   {"v": "S44", "k": "CX3", "d": "2026-10-02"},
   {"v": "B24", "k": "A5", "d": "2026-10-02"},
-  {"v": "S44", "k": "A23", "d": "2026-10-05"}
+  {"v": "S44", "k": "A23", "d": "2026-10-05"},
+  {"v": "B24", "k": "AX", "d": "2026-10-07"}
  ],
  "bench": {"booster": {"stack": {"days": 46, "src": "B22"}, "outfit": {"days": 15, "src": "B18"}, "proof": {"days": 3, "src": "B20"}, "raptor": {"days": 28, "src": "B19"}, "lpt": {"days": 3, "src": "B20"}, "flight": {"days": 12, "src": "B20"}}, "ship": {}},
  "ref": {"booster": "B22", "ship": "S41"}
