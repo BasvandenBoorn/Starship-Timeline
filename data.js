@@ -1,5 +1,5 @@
 const SAMPLE = {
- "updated": "2026-10-17",
+ "updated": "2026-10-20",
  "vehicles": [
   {"id": "B19", "sub": "Flight 12", "kind": "booster", "off": 1},
   {"id": "B20", "sub": "Flight 13", "kind": "booster", "off": 1},
