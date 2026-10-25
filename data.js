@@ -1,5 +1,5 @@
 const SAMPLE = {
- "updated": "2026-10-24",
+ "updated": "2026-10-25",
  "vehicles": [
   {"id": "B19", "sub": "Flight 12", "kind": "booster", "off": 1},
   {"id": "B20", "sub": "Flight 13", "kind": "booster", "off": 1},
@@ -122,7 +122,8 @@ const SAMPLE = {
   {"v": "S42", "t": "cryo", "d": "2026-09-03", "n": "2x Cryo"},
   {"v": "S42", "t": "cryo", "d": "2026-10-09", "n": ""},
   {"v": "S41", "t": "cryo", "d": "2026-06-29", "n": "2x Cryo"},
-  {"v": "B23", "t": "cryo", "d": "2026-10-15", "n": ""}
+  {"v": "B23", "t": "cryo", "d": "2026-10-15", "n": ""},
+  {"v": "B22", "t": "static", "d": "2026-10-25", "n": ""}
  ],
  "stack": [
   {"v": "B19", "k": "first", "d": "2025-11-27"},
