@@ -128,8 +128,8 @@ const SAMPLE = {
   {"v": "B23", "t": "cryo", "d": "2026-10-15", "n": ""},
   {"v": "B22", "t": "static", "d": "2026-10-25", "n": "Full duration 33-engine"},
   {"v": "S43", "t": "cryo", "d": "2026-10-23", "n": ""},
-  {"v": "S42", "t": "static", "d": "2026-10-27", "n": "6 - 58 seconds"},
-  {"v": "S42", "t": "static", "d": "2026-10-26", "n": "single engine SF"}
+  {"v": "S42", "t": "static", "d": "2026-10-26", "n": "single engine SF"},
+  {"v": "S42", "t": "static", "d": "2026-10-27", "n": "6 - 58 seconds"}
  ],
  "stack": [
   {"v": "B19", "k": "first", "d": "2025-11-27"},
