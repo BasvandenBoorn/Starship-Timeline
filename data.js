@@ -1,5 +1,5 @@
 const SAMPLE = {
- "updated": "2026-10-29",
+ "updated": "2026-11-03",
  "vehicles": [
   {"id": "B19", "sub": "Flight 12", "kind": "booster", "off": 1},
   {"id": "B20", "sub": "Flight 13", "kind": "booster", "off": 1},
@@ -7,6 +7,7 @@ const SAMPLE = {
   {"id": "B22", "sub": "Flight 15", "kind": "booster", "off": 0},
   {"id": "B23", "sub": "Flight 16", "kind": "booster", "off": 0},
   {"id": "B24", "sub": "Flight 17", "kind": "booster", "off": 0},
+  {"id": "B25", "sub": "Flight 18", "kind": "booster", "off": 0},
   {"id": "S39", "sub": "Flight 12", "kind": "ship", "off": 1},
   {"id": "S40", "sub": "Flight 13", "kind": "ship", "off": 1},
   {"id": "S41", "sub": "Flight 14", "kind": "ship", "off": 0},
@@ -14,7 +15,7 @@ const SAMPLE = {
   {"id": "S43", "sub": "Flight 16", "kind": "ship", "off": 0},
   {"id": "S44", "sub": "Flight 17", "kind": "ship", "off": 0},
   {"id": "S45", "sub": "Flight 18", "kind": "ship", "off": 0},
-  {"id": "S46", "sub": "Flight 19", "kind": "ship"}
+  {"id": "S46", "sub": "Flight 19", "kind": "ship", "off": 0}
  ],
  "phases": [
   {"v": "B21", "t": "outfit", "s": "2026-06-28", "e": "2026-07-17", "f": 0},
@@ -27,7 +28,6 @@ const SAMPLE = {
   {"v": "B22", "t": "outfit", "s": "2026-08-14", "e": "2026-09-08"},
   {"v": "B22", "t": "proof", "s": "2026-09-08", "e": "2026-09-11"},
   {"v": "B23", "t": "stack", "s": "2026-08-14", "e": "2026-09-25"},
-  {"v": "B24", "t": "stack", "s": "2026-09-28", "e": ""},
   {"v": "B20", "t": "stack", "s": "2026-02-06", "e": "2026-04-30"},
   {"v": "B20", "t": "outfit", "s": "2026-04-30", "e": "2026-06-05"},
   {"v": "B20", "t": "proof", "s": "2026-06-05", "e": "2026-06-08"},
@@ -77,7 +77,10 @@ const SAMPLE = {
   {"v": "S43", "t": "proof", "s": "2026-10-22", "e": "2026-10-25"},
   {"v": "S43", "t": "raptor", "s": "2026-10-25", "e": ""},
   {"v": "S42", "t": "lpt", "s": "2026-10-26", "e": "2026-10-29"},
-  {"v": "S42", "t": "flight", "s": "2026-10-29", "e": ""}
+  {"v": "S42", "t": "flight", "s": "2026-10-29", "e": ""},
+  {"v": "B24", "t": "stack", "s": "2026-09-28", "e": "2026-10-30"},
+  {"v": "B24", "t": "outfit", "s": "2026-10-30", "e": ""},
+  {"v": "B25", "t": "stack", "s": "2026-11-02", "e": ""}
  ],
  "events": [
   {"v": "B19", "t": "cryo", "d": "2026-02-02", "n": "Partial Cryo"},
@@ -238,7 +241,10 @@ const SAMPLE = {
   {"v": "B23", "k": "FX", "d": "2026-09-18"},
   {"v": "B24", "k": "F2", "d": "2026-10-21"},
   {"v": "B24", "k": "FX", "d": "2026-10-23"},
-  {"v": "B24", "k": "F3", "d": "2026-10-25"}
+  {"v": "B24", "k": "F3", "d": "2026-10-25"},
+  {"v": "B24", "k": "complete", "d": "2026-10-30"},
+  {"v": "S45", "k": "CX3", "d": "2026-10-31"},
+  {"v": "B25", "k": "first", "d": "2026-11-02"}
  ],
  "bench": {"booster": {"stack": {"days": 46, "src": "B22"}, "outfit": {"days": 15, "src": "B18"}, "proof": {"days": 3, "src": "B20"}, "raptor": {"days": 28, "src": "B19"}, "lpt": {"days": 3, "src": "B20"}, "flight": {"days": 12, "src": "B20"}}, "ship": {}},
  "ref": {"booster": "B22", "ship": "S41"}
