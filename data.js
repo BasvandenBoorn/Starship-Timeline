@@ -10,12 +10,12 @@ const SAMPLE = {
   {"id": "B25", "sub": "Flight 18", "kind": "booster", "off": 0},
   {"id": "S39", "sub": "Flight 12", "kind": "ship", "off": 1},
   {"id": "S40", "sub": "Flight 13", "kind": "ship", "off": 1},
-  {"id": "S41", "sub": "Flight 14", "kind": "ship", "off": 1},
-  {"id": "S42", "sub": "Flight 15", "kind": "ship", "off": 1},
-  {"id": "S43", "sub": "Flight 16", "kind": "ship", "off": 1},
-  {"id": "S44", "sub": "Flight 17", "kind": "ship", "off": 1},
+  {"id": "S41", "sub": "Flight 14", "kind": "ship", "off": 0},
+  {"id": "S42", "sub": "Flight 15", "kind": "ship", "off": 0},
+  {"id": "S43", "sub": "Flight 16", "kind": "ship", "off": 0},
+  {"id": "S44", "sub": "Flight 17", "kind": "ship", "off": 0},
   {"id": "S45", "sub": "Flight 18", "kind": "ship", "off": 0},
-  {"id": "S46", "sub": "Flight 19", "kind": "ship", "off": 1}
+  {"id": "S46", "sub": "Flight 19", "kind": "ship", "off": 0}
  ],
  "phases": [
   {"v": "B21", "t": "outfit", "s": "2026-06-28", "e": "2026-07-17", "f": 0},
