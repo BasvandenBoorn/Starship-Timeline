@@ -253,6 +253,6 @@ const SAMPLE = {
   {"v": "S45", "k": "complete", "d": "2026-11-10"},
   {"v": "B25", "k": "A5", "d": "2026-11-10"}
  ],
- "bench": {"booster": {"stack": {"days": 46, "src": "B22"}, "outfit": {"days": 15, "src": "B18"}, "proof": {"days": 3, "src": "B20"}, "raptor": {"days": 28, "src": "B19"}, "lpt": {"days": 3, "src": "B20"}, "flight": {"days": 12, "src": "B20"}}, "ship": {}},
- "ref": {"booster": "B22", "ship": "S41"}
+ "bench": {"booster": {"stack": {"days": 42, "src": "B23"}, "outfit": {"days": 15, "src": "B18"}, "proof": {"days": 3, "src": "B20"}, "raptor": {"days": 28, "src": "B19"}, "lpt": {"days": 3, "src": "B20"}, "flight": {"days": 12, "src": "B20"}}, "ship": {}},
+ "ref": {"booster": "B23", "ship": "S45"}
 };
