@@ -82,7 +82,7 @@ button:not(:disabled):hover{filter:brightness(1.25)}
  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px"><label>Booster stack reference<select id="rfb"></select></label><label>Ship stack reference<select id="rfs"></select></label></div>
  <div class="tw"><table><thead><tr><th>Phase</th><th>Booster days</th><th>Booster source</th><th>Ship days</th><th>Ship source</th></tr></thead><tbody id="bt"></tbody></table></div></div>
 <div class="card ed">
- <h2>Enter milestones</h2><p>Changes only live until you reload the page: use Export data.js and put the result in data.js on GitHub. Forecasts use the same method as starship-timeline.pages.dev: a fastest-benchmark duration per phase, with stacking matched against a reference vehicle (edit BENCH / STACK_REF at the top of the script). You can enter the same vehicle + phase/milestone/event multiple times; existing entries are kept. Leave End empty for a phase that is still in progress.</p>
+ <h2>Enter milestones</h2><p>Changes only live until you reload the page: use Export data.js and put the result in your data.js file. Forecasts use the same method as starship-timeline.pages.dev: a fastest-benchmark duration per phase, with stacking matched against a reference vehicle (edit BENCH / STACK_REF at the top of the script). You can enter the same vehicle + phase/milestone/event multiple times; existing entries are kept. Leave End empty for a phase that is still in progress.</p>
  <form id="fv"><label>Vehicle ID<input id="vi" placeholder="B25 or S42" required></label><label>Description<input id="vs" placeholder="Stacking"></label>
   <label>Type<select id="vk"><option value="booster">Booster</option><option value="ship">Ship</option></select></label><button>Add vehicle</button></form>
  <form id="fp"><label>Vehicle<select class="vsel" id="pv"></select></label><label>Phase<select id="pt"></select></label>
@@ -142,7 +142,7 @@ function derive(){
   if(li<0||E.some(e=>e.v===v.id&&e.t==="launch"))return;
   const last=has(ORDER[li]);let s=last.e?ts(last.e):ts(last.s);
   for(let i=last.e?li+1:li;i<6;i++){const t=ORDER[i],b=bench(v.kind,t),est=t==="stack"?stackEst(v):null,g=est?est.date:s+b.days*D,e=Math.max(g,bd),s0=Math.max(s,bd);
-   if(e>s0)o.phases.push({v:v.id,t,s:dstr(s0),e:dstr(e),f:1,c:s<=bd?1:0,n:(est?"Milestone-matched estimate from "+est.k+" progress on "+est.rid+".":"Fastest comparable interval from "+b.src+".")+" Duration: "+Math.round((e-s0)/D)+" days."});
+   if(e>s0)o.phases.push({v:v.id,t,s:dstr(s0),e:dstr(e),f:1,c:(i===li&&!last.e)?1:0,n:(est?"Milestone-matched estimate from "+est.k+" progress on "+est.rid+".":"Fastest comparable interval from "+b.src+".")+" Duration: "+Math.round((e-s0)/D)+" days."});
    const ek={stack:"stackdone",outfit:"cryo",lpt:"static",flight:"launch"}[t];
    if(ek&&!E.some(x=>x.v===v.id&&x.t===ek))o.events.push({v:v.id,t:ek,d:dstr(e),f:1,n:est?"Predicted from matched "+est.k+" progress on "+est.rid+".":"Predicted from "+b.days+"-day "+PNAME[t]+" benchmark set by "+b.src+"."});
    s=e}
@@ -201,7 +201,7 @@ function draw(){TT.style.display="none";
   ph.filter(p=>p.v===v.id&&!hid.has(p.t)&&!(p.f&&hid.has("fc"))).forEach(p=>{
    const x1=x(ts(p.s)),w=Math.max(3,x(ts(p.e))-x1),c=PT[p.t][1],g=sv("g",{style:"cursor:pointer"},svg);
    if(p.f){sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c,opacity:.55},g);sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:"url(#h)",...(p.c?{}:{stroke:"#ffffff77","stroke-dasharray":"4 3"})},g)}
-   else sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c},g);
+   else sv("rect",{x:x1,y:y0+30,width:w,height:28,rx:4,fill:c,stroke:"#ffffff66","stroke-width":1},g);
    const nm=PT[p.t][2]??""; if(nm&&w>nm.length*6.5+10)sv("text",{x:x1+7,y:y0+48,class:"lb"},g,nm);
    tipOn(g,[v.id+" · "+PT[p.t][0],fd(ts(p.s),fy)+" → "+fd(ts(p.e),fy)+" ("+Math.round((ts(p.e)-ts(p.s))/D)+" days)"+(p.f?" · forecast":""),p.n||""]);g.onclick=()=>info(`${v.id} · ${PT[p.t][0]} · ${fd(ts(p.s),fy)} → ${fd(ts(p.e),fy)}${p.f?" · forecast":""}${p.n?" · "+p.n:""}`)});
   if(!hid.has("stack")){const sms=X.stack.filter(m=>m.v===v.id&&!m.f&&m.k!=="complete").sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:0),f0=X.stack.find(m=>m.v===v.id&&m.k==="first"&&!m.f),sp=ph.filter(p=>p.v===v.id&&p.t==="stack"),t0=f0?ts(f0.d):sp.length?Math.min(...sp.map(p=>ts(p.s))):null;
